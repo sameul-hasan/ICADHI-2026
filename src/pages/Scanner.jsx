@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { db } from "../services/firebase";
-import { doc, getDoc, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, serverTimestamp, query, where, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
@@ -147,10 +147,26 @@ export const Scanner = () => {
   const processParticipantCheckIn = async (participantId, token = "") => {
     setUpdatingField(true);
     try {
-      const docRef = doc(db, "participants", participantId);
-      const snap = await getDoc(docRef);
+      let docRef = doc(db, "participants", participantId);
+      let snap = await getDoc(docRef);
+      let pData = null;
+      let actualDocId = participantId;
 
-      if (!snap.exists()) {
+      if (snap.exists()) {
+        pData = snap.data();
+      } else {
+        // Fallback: search for a participant document with participantId field matching the scanned participantId
+        const q = query(collection(db, "participants"), where("participantId", "==", participantId));
+        const qSnap = await getDocs(q);
+        if (!qSnap.empty) {
+          const matchedDoc = qSnap.docs[0];
+          docRef = matchedDoc.ref;
+          pData = matchedDoc.data();
+          actualDocId = matchedDoc.id;
+        }
+      }
+
+      if (!pData) {
         setResultStatus("invalid");
         setScannedParticipant(null);
         showToast("Participant record not found in system.", "error");
@@ -158,7 +174,7 @@ export const Scanner = () => {
         return;
       }
 
-      const p = { id: snap.id, ...snap.data() };
+      const p = { id: actualDocId, ...pData };
       setScannedParticipant(p);
 
       // Verify secure token if present

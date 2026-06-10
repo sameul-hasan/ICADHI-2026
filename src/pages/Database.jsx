@@ -7,6 +7,7 @@ import {
   deleteDoc, 
   updateDoc, 
   addDoc, 
+  setDoc,
   serverTimestamp 
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
@@ -238,7 +239,7 @@ export const DatabasePage = () => {
         const secureToken = `ICADHI-2026-${Math.random().toString(36).substr(2, 9).toUpperCase()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId, secureToken }))}`;
 
-        await addDoc(collection(db, "participants"), {
+        await setDoc(doc(db, "participants", participantId), {
           participantId,
           fullName: formData.fullName,
           email: formData.email,
