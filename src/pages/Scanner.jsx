@@ -40,6 +40,11 @@ export const Scanner = () => {
     return "registration"; // Default for Admin/Super Admin
   };
   const [activeDesk, setActiveDesk] = useState(getInitialDesk());
+  const activeDeskRef = useRef(activeDesk);
+
+  useEffect(() => {
+    activeDeskRef.current = activeDesk;
+  }, [activeDesk]);
 
   // Result display states
   const [resultStatus, setResultStatus] = useState(null); // success | duplicate | invalid | idle
@@ -205,7 +210,7 @@ export const Scanner = () => {
       const currentUserRole = role || "volunteer";
 
       // 1. REGISTRATION WORKFLOW
-      if (activeDesk === "registration") {
+      if (activeDeskRef.current === "registration") {
         if (p.registrationScanned) {
           setResultStatus("duplicate");
           setPreviousScanInfo({
@@ -238,7 +243,7 @@ export const Scanner = () => {
       }
 
       // 2. BREAKFAST WORKFLOW
-      else if (activeDesk === "breakfast") {
+      else if (activeDeskRef.current === "breakfast") {
         if (p.breakfastCollected) {
           setResultStatus("duplicate");
           setPreviousScanInfo({
@@ -270,7 +275,7 @@ export const Scanner = () => {
       }
 
       // 3. LUNCH WORKFLOW
-      else if (activeDesk === "lunch") {
+      else if (activeDeskRef.current === "lunch") {
         if (p.lunchCollected) {
           setResultStatus("duplicate");
           setPreviousScanInfo({
