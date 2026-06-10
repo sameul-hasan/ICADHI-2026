@@ -1,10 +1,14 @@
-const admin = require("firebase-admin");
+import admin from "firebase-admin";
 
 if (!admin.apps.length) {
   let cert = null;
   try {
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       cert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      if (cert.private_key) {
+        // Fix for Vercel newline escaping on private keys
+        cert.private_key = cert.private_key.replace(/\\n/g, '\n');
+      }
     }
   } catch (err) {
     console.error("Firebase Service Account credentials parsing failed:", err);
@@ -22,5 +26,5 @@ if (!admin.apps.length) {
   }
 }
 
-const db = admin.firestore();
-module.exports = { admin, db };
+export const db = admin.firestore();
+export { admin };

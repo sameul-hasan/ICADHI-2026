@@ -1,5 +1,5 @@
-const { db, admin } = require("./utils/firebase");
-const crypto = require("crypto");
+import { db, admin } from "./utils/firebase.js";
+import crypto from "crypto";
 
 const ALGORITHM = 'aes-256-cbc';
 const SECRET_KEY = process.env.ENCRYPTION_KEY || 'icadhi-2026-secret-key-32chars!';
@@ -13,7 +13,7 @@ function encrypt(text) {
   return `${iv.toString('hex')}:${encrypted}`;
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -86,4 +86,4 @@ module.exports = async (req, res) => {
     console.error("Save SMTP error:", err);
     return res.status(500).json({ error: err.message });
   }
-};
+}
