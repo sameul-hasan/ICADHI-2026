@@ -228,7 +228,7 @@ export const DatabasePage = () => {
           userEmail: userProfile?.email || "unknown",
           userRole: userProfile?.role || "admin",
           action: "Participant Profile Updated",
-          details: `Updated info for ${formData.teamName ? `${formData.teamName} (Leader: ${formData.fullName})` : formData.fullName} (${formData.email})`,
+          details: `Updated info for ${formData.teamName || formData.fullName} (${formData.email})`,
           timestamp: serverTimestamp()
         });
 
@@ -284,7 +284,7 @@ export const DatabasePage = () => {
           userEmail: userProfile?.email || "unknown",
           userRole: userProfile?.role || "admin",
           action: "Participant Created",
-          details: `Manually added participant: ${formData.teamName ? `${formData.teamName} (Leader: ${formData.fullName})` : formData.fullName} (${formData.email})`,
+          details: `Manually added participant: ${formData.teamName || formData.fullName} (${formData.email})`,
           timestamp: serverTimestamp()
         });
 
@@ -309,7 +309,7 @@ export const DatabasePage = () => {
         userEmail: userProfile?.email || "unknown",
         userRole: userProfile?.role || "super_admin",
         action: "Participant Deleted",
-        details: `Deleted participant record: ${selectedPart.teamName ? `${selectedPart.teamName} (Leader: ${selectedPart.fullName})` : selectedPart.fullName} (${selectedPart.email})`,
+        details: `Deleted participant record: ${selectedPart.teamName || selectedPart.fullName} (${selectedPart.email})`,
         timestamp: serverTimestamp()
       });
 

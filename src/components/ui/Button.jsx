@@ -15,7 +15,7 @@ export const Button = ({
   const baseStyles = "inline-flex items-center justify-center font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 btn-transition";
 
   const variants = {
-    primary: "bg-gradient-to-tr from-primary-600 to-primary-500 text-white hover:from-primary-500 hover:to-primary-400 focus:ring-primary-500 shadow-md hover:shadow-xl hover:-translate-y-0.5 dark:from-primary-500 dark:to-primary-600",
+    primary: "bg-gradient-to-tr from-blue-950 to-blue-900 text-white hover:from-blue-900 hover:to-blue-800 focus:ring-blue-900 shadow-md hover:shadow-xl hover:-translate-y-0.5 dark:from-blue-900 dark:to-blue-800",
     secondary: "bg-gradient-to-tr from-secondary-600 to-secondary-500 text-white hover:from-secondary-500 hover:to-secondary-400 focus:ring-secondary-400 shadow-md hover:shadow-xl hover:-translate-y-0.5",
     accent: "bg-gradient-to-tr from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 focus:ring-accent-400 shadow-md hover:shadow-xl hover:-translate-y-0.5",
     outline: "border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:ring-slate-400 shadow-sm hover:shadow-md hover:-translate-y-0.5",

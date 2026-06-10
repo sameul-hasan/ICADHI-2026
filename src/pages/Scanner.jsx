@@ -231,7 +231,7 @@ export const Scanner = () => {
             userEmail: currentUserEmail,
             userRole: currentUserRole,
             action: "Participant Checked In",
-            details: `${p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName} checked in at Registration Desk`,
+            details: `${p.teamName || p.fullName} checked in at Registration Desk`,
             timestamp: serverTimestamp()
           });
         }
@@ -263,7 +263,7 @@ export const Scanner = () => {
             userEmail: currentUserEmail,
             userRole: currentUserRole,
             action: "Breakfast Distributed",
-            details: `${p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName} received breakfast`,
+            details: `${p.teamName || p.fullName} received breakfast`,
             timestamp: serverTimestamp()
           });
         }
@@ -295,7 +295,7 @@ export const Scanner = () => {
             userEmail: currentUserEmail,
             userRole: currentUserRole,
             action: "Lunch Distributed",
-            details: `${p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName} received lunch`,
+            details: `${p.teamName || p.fullName} received lunch`,
             timestamp: serverTimestamp()
           });
         }
@@ -330,7 +330,7 @@ export const Scanner = () => {
         userEmail: userProfile?.email || "unknown",
         userRole: role || "volunteer",
         action: "Registration Kit Issued",
-        details: `Issued Registration Kit to ${scannedParticipant.teamName ? `${scannedParticipant.teamName} (Leader: ${scannedParticipant.fullName})` : scannedParticipant.fullName}`,
+        details: `Issued Registration Kit to ${scannedParticipant.teamName || scannedParticipant.fullName}`,
         timestamp: serverTimestamp()
       });
     } catch (err) {
