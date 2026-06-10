@@ -128,11 +128,11 @@ export const App = () => {
                           } 
                         />
                         
-                        {/* SMTP Config (Super Admin only) */}
+                        {/* SMTP Config (Admin & Super Admin) */}
                         <Route 
                           path="/smtp" 
                           element={
-                            <RoleRoute allowedRoles={["super_admin"]}>
+                            <RoleRoute allowedRoles={["super_admin", "admin"]}>
                               <SmtpSettings />
                             </RoleRoute>
                           } 

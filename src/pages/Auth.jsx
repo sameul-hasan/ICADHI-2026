@@ -60,7 +60,7 @@ export const Auth = () => {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="ICADHI 2026 Logo" className="h-16 mx-auto object-contain mb-4" />
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 leading-tight">
+          <h2 className="text-3xl font-extrabold tracking-tight text-blue-950 dark:text-blue-300 leading-tight">
             ICADHI 2026
           </h2>
           <p className="text-sm font-semibold tracking-wider text-slate-500 dark:text-slate-400 mt-1 uppercase">

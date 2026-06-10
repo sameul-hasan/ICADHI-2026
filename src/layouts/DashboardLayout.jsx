@@ -84,7 +84,7 @@ export const DashboardLayout = ({ children }) => {
       name: "SMTP Config", 
       path: "/smtp", 
       icon: <Settings2 className="h-5 w-5" />, 
-      show: isSuperAdmin 
+      show: isAdmin 
     },
     { 
       name: "User Management", 
