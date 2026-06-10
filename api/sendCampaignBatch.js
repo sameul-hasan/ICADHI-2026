@@ -1,6 +1,3 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
@@ -46,6 +43,11 @@ export default async function handler(req, res) {
 
   const idToken = authHeader.split("Bearer ")[1];
   try {
+    // Dynamically load firebase-admin sub-packages to catch import/resolution issues inside the try-catch block
+    const { initializeApp, getApps, cert } = await import('firebase-admin/app');
+    const { getFirestore, FieldValue } = await import('firebase-admin/firestore');
+    const { getAuth } = await import('firebase-admin/auth');
+
     // Initialize Firebase Admin dynamically to catch credentials setup errors
     if (!getApps().length) {
       let saCert = null;

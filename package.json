@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^8.6.0",
+    "@google-cloud/storage": "^7.19.0",
     "@tanstack/react-query": "^5.101.0",
     "autoprefixer": "^10.5.0",
     "firebase": "^12.14.0",
