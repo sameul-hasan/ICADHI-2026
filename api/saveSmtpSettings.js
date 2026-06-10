@@ -1,4 +1,4 @@
-import { db, admin } from "./utils/firebase.js";
+import admin from "firebase-admin";
 import crypto from "crypto";
 
 const ALGORITHM = 'aes-256-cbc';
@@ -37,20 +37,40 @@ export default async function handler(req, res) {
 
   const idToken = authHeader.split("Bearer ")[1];
   try {
+    // Initialize Firebase Admin dynamically to catch credentials setup errors
+    if (!admin.apps.length) {
+      let cert = null;
+      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        cert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        if (cert.private_key) {
+          cert.private_key = cert.private_key.replace(/\\n/g, '\n');
+        }
+      }
+      if (cert) {
+        admin.initializeApp({
+          credential: admin.credential.cert(cert)
+        });
+      } else {
+        throw new Error("FIREBASE_SERVICE_ACCOUNT environment variable is missing or empty. Please check your Vercel Project Settings.");
+      }
+    }
+
+    const db = admin.firestore();
+
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
     // RBAC verification
     const userDoc = await db.collection("users").doc(uid).get();
     if (!userDoc.exists) {
-      return res.status(403).json({ error: "User profile not found" });
+      return res.status(403).json({ error: "User profile not found in database" });
     }
     const role = userDoc.data().role;
     if (role !== "super_admin") {
       return res.status(403).json({ error: "Access Denied: Super Admin permissions required" });
     }
 
-    const { host, port, username, password, fromName, fromEmail } = req.body;
+    const { host, port, username, password, fromName, fromEmail } = req.body || {};
     if (!host || !port || !username || !fromEmail) {
       return res.status(400).json({ error: "Missing required SMTP parameters" });
     }
