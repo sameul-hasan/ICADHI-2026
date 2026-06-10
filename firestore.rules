@@ -1,0 +1,121 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper: Is user authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper: Get user role from /users collection
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Helper: Check specific roles
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserRole() == 'super_admin';
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'super_admin');
+    }
+    
+    function isRegDesk() {
+      return isAuthenticated() && (getUserRole() == 'registration_desk' || isAdmin());
+    }
+    
+    function isBreakfastDesk() {
+      return isAuthenticated() && (getUserRole() == 'breakfast_desk' || isAdmin());
+    }
+    
+    function isLunchDesk() {
+      return isAuthenticated() && (getUserRole() == 'lunch_desk' || isAdmin());
+    }
+    
+    function isVolunteer() {
+      return isAuthenticated() && (
+        getUserRole() == 'volunteer' || 
+        getUserRole() == 'registration_desk' || 
+        getUserRole() == 'breakfast_desk' || 
+        getUserRole() == 'lunch_desk' || 
+        isAdmin()
+      );
+    }
+
+    // 1. Users collection rules
+    match /users/{userId} {
+      allow get: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAuthenticated(); // Allowed to list/query to check if empty during bootstrap
+      // A new user can write their profile on signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Users can update their own info (excluding role changes unless Super Admin)
+      allow update: if isAuthenticated() && (
+        isSuperAdmin() || 
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // 2. Participants collection rules
+    match /participants/{participantId} {
+      allow read: if isVolunteer();
+      allow create: if isAdmin();
+      allow delete: if isSuperAdmin();
+      
+      // Fine-grained field updates depending on Desk role
+      allow update: if isAdmin() || (
+        isAuthenticated() && (
+          // Registration Desk allowed fields: registrationScanned, kitCollected, and timestamps
+          (isRegDesk() && 
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'participantId', 'fullName', 'email', 'phone', 'institution', 'department', 
+              'designation', 'country', 'registrationType', 'paymentStatus', 'uniqueToken', 'qrCodeUrl',
+              'breakfastCollected', 'breakfastCollectedAt', 'lunchCollected', 'lunchCollectedAt', 'emailSent', 'emailSentAt'
+            ])
+          ) ||
+          // Breakfast Desk allowed fields: breakfastCollected, breakfastCollectedAt
+          (isBreakfastDesk() && 
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'participantId', 'fullName', 'email', 'phone', 'institution', 'department', 
+              'designation', 'country', 'registrationType', 'paymentStatus', 'uniqueToken', 'qrCodeUrl',
+              'registrationScanned', 'registrationScannedAt', 'kitCollected', 'kitCollectedAt',
+              'lunchCollected', 'lunchCollectedAt', 'emailSent', 'emailSentAt'
+            ])
+          ) ||
+          // Lunch Desk allowed fields: lunchCollected, lunchCollectedAt
+          (isLunchDesk() && 
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'participantId', 'fullName', 'email', 'phone', 'institution', 'department', 
+              'designation', 'country', 'registrationType', 'paymentStatus', 'uniqueToken', 'qrCodeUrl',
+              'registrationScanned', 'registrationScannedAt', 'kitCollected', 'kitCollectedAt',
+              'breakfastCollected', 'breakfastCollectedAt', 'emailSent', 'emailSentAt'
+            ])
+          )
+        )
+      );
+    }
+
+    // 3. SMTP settings rules: Only accessible by Super Admin
+    match /smtpSettings/{document} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // 4. Email templates rules
+    match /emailTemplates/{templateId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 5. Email campaigns rules
+    match /emailCampaigns/{campaignId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 6. Audit logs rules: Authenticated users can write; only Admins/Super Admins can read
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Audit logs are immutable
+    }
+  }
+}
