@@ -74,6 +74,7 @@ export const DatabasePage = () => {
     paymentStatus: "Pending",
     teamName: "",
     teamMembers: "",
+    tShirtSize: "",
     ieeeMembershipLink: "",
     bkashNumber: "",
     transactionId: "",
@@ -154,6 +155,7 @@ export const DatabasePage = () => {
         paymentStatus: part.paymentStatus || "Pending",
         teamName: part.teamName || "",
         teamMembers: part.teamMembers || "",
+        tShirtSize: part.tShirtSize || "",
         ieeeMembershipLink: part.ieeeMembershipLink || "",
         bkashNumber: part.bkashNumber || "",
         transactionId: part.transactionId || "",
@@ -212,6 +214,7 @@ export const DatabasePage = () => {
           paymentStatus: formData.paymentStatus,
           teamName: formData.teamName,
           teamMembers: formData.teamMembers,
+          tShirtSize: formData.tShirtSize,
           ieeeMembershipLink: formData.ieeeMembershipLink,
           bkashNumber: formData.bkashNumber,
           transactionId: formData.transactionId,
@@ -252,6 +255,7 @@ export const DatabasePage = () => {
           paymentStatus: formData.paymentStatus,
           teamName: formData.teamName,
           teamMembers: formData.teamMembers,
+          tShirtSize: formData.tShirtSize,
           ieeeMembershipLink: formData.ieeeMembershipLink,
           bkashNumber: formData.bkashNumber,
           transactionId: formData.transactionId,
@@ -641,9 +645,15 @@ export const DatabasePage = () => {
                 )}
               </div>
               {selectedPart.teamMembers && (
-                <div className="pt-2">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Other Team Members</span>
+                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Team Members</span>
                   <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-normal">{selectedPart.teamMembers}</p>
+                </div>
+              )}
+              {selectedPart.tShirtSize && (
+                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">T-Shirt Sizes</span>
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 leading-normal">{selectedPart.tShirtSize}</p>
                 </div>
               )}
               {selectedPart.ieeeMembershipLink && (
@@ -852,11 +862,17 @@ export const DatabasePage = () => {
                 onChange={(e) => setFormData(prev => ({ ...prev, ambassadorId: e.target.value }))}
               />
             </div>
-            <Input
-              label="Others Team Member Names"
-              placeholder="Alice, Bob, Charlie"
+            <Input 
+              label="Other Team Members" 
+              placeholder="E.g., John Doe, Jane Smith"
               value={formData.teamMembers}
               onChange={(e) => setFormData(prev => ({ ...prev, teamMembers: e.target.value }))}
+            />
+            <Input 
+              label="T-Shirt Sizes" 
+              placeholder="E.g., L (Leader), M (Member 2)"
+              value={formData.tShirtSize}
+              onChange={(e) => setFormData(prev => ({ ...prev, tShirtSize: e.target.value }))}
             />
             <Input
               label="IEEE Membership Certificate Link"

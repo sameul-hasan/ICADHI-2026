@@ -569,10 +569,18 @@ export const Scanner = () => {
                           </Badge>
                         </p>
                       </div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-400 uppercase">Country</span>
-                        <p className="font-extrabold text-slate-850 dark:text-slate-200 mt-0.5">{scannedParticipant.country || "Unknown"}</p>
-                      </div>
+                      {scannedParticipant.teamMembers && (
+                        <div className="col-span-2">
+                          <span className="text-xs font-bold text-slate-400 uppercase">Team Members</span>
+                          <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 text-xs">{scannedParticipant.teamMembers}</p>
+                        </div>
+                      )}
+                      {scannedParticipant.tShirtSize && (
+                        <div className="col-span-2">
+                          <span className="text-xs font-bold text-slate-400 uppercase">T-Shirt Sizes</span>
+                          <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 text-xs">{scannedParticipant.tShirtSize}</p>
+                        </div>
+                      )}
                       <div>
                         <span className="text-xs font-bold text-slate-400 uppercase">Email Address</span>
                         <p className="font-bold text-slate-600 dark:text-slate-400 mt-0.5 truncate">{scannedParticipant.email}</p>

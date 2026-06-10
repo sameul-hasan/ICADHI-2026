@@ -64,6 +64,7 @@ export const UploadPage = () => {
       // New columns for the hackathon/team registration
       teamName: findHeaderIndex(["Team's Name", "Team Name"]),
       teamMembers: findHeaderIndex(["Others Team Member Names", "Other Team Member Names", "Team Members"]),
+      tShirtSize: findHeaderIndex(["T-Shirt Size", "T-shirt", "TShirt Size", "Tshirt", "T-Shirt", "Shirt Size", "T-shirt Size (Team Leader)", "T-Shirt Sizes", "T-Shirt Size (Others)"]),
       ieeeMembershipLink: findHeaderIndex([
         "Do any of the team members have an activ IEEE Membership Certificate Link",
         "Do any of the team members have an active IEEE Membership Certificate Link",
@@ -134,6 +135,7 @@ export const UploadPage = () => {
       // Read custom Hackathon team attributes
       const teamName = headerMapping.teamName !== -1 && row[headerMapping.teamName] ? String(row[headerMapping.teamName]).trim() : "";
       const teamMembers = headerMapping.teamMembers !== -1 && row[headerMapping.teamMembers] ? String(row[headerMapping.teamMembers]).trim() : "";
+      const tShirtSize = headerMapping.tShirtSize !== -1 && row[headerMapping.tShirtSize] ? String(row[headerMapping.tShirtSize]).trim() : "";
       const ieeeMembershipLink = headerMapping.ieeeMembershipLink !== -1 && row[headerMapping.ieeeMembershipLink] ? String(row[headerMapping.ieeeMembershipLink]).trim() : "";
       const bkashNumber = headerMapping.bkashNumber !== -1 && row[headerMapping.bkashNumber] ? String(row[headerMapping.bkashNumber]).trim() : "";
       const transactionId = headerMapping.transactionId !== -1 && row[headerMapping.transactionId] ? String(row[headerMapping.transactionId]).trim() : "";
@@ -156,6 +158,7 @@ export const UploadPage = () => {
         paymentStatus,
         teamName,
         teamMembers,
+        tShirtSize,
         ieeeMembershipLink,
         bkashNumber,
         transactionId,
@@ -299,6 +302,7 @@ export const UploadPage = () => {
             // Custom Hackathon details
             teamName: row.teamName || "",
             teamMembers: row.teamMembers || "",
+            tShirtSize: row.tShirtSize || "",
             ieeeMembershipLink: row.ieeeMembershipLink || "",
             bkashNumber: row.bkashNumber || "",
             transactionId: row.transactionId || "",
