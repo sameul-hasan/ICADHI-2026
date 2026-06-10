@@ -71,8 +71,8 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "User profile not found in database" });
     }
     const role = userDoc.data().role;
-    if (role !== "super_admin") {
-      return res.status(403).json({ error: "Access Denied: Super Admin permissions required" });
+    if (role !== "super_admin" && role !== "admin") {
+      return res.status(403).json({ error: "Access Denied: Admin permissions required" });
     }
 
     const { host, port, username, password, fromName, fromEmail } = req.body || {};

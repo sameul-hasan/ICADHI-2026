@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     }
     const role = userDoc.data().role;
     if (role !== "super_admin" && role !== "admin") {
-      return res.status(403).json({ error: "Access Denied: Permissions required" });
+      return res.status(403).json({ error: "Access Denied: Admin permissions required" });
     }
 
     // Load SMTP credentials

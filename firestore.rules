@@ -96,9 +96,9 @@ service cloud.firestore {
       );
     }
 
-    // 3. SMTP settings rules: Only accessible by Super Admin
+    // 3. SMTP settings rules: Only accessible by Admin
     match /smtpSettings/{document} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isAdmin();
     }
 
     // 4. Email templates rules
