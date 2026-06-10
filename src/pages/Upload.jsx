@@ -64,7 +64,12 @@ export const UploadPage = () => {
       // New columns for the hackathon/team registration
       teamName: findHeaderIndex(["Team's Name", "Team Name"]),
       teamMembers: findHeaderIndex(["Others Team Member Names", "Other Team Member Names", "Team Members"]),
-      tShirtSize: findHeaderIndex(["T-Shirt Size", "T-shirt", "TShirt Size", "Tshirt", "T-Shirt", "Shirt Size", "T-shirt Size (Team Leader)", "T-Shirt Sizes", "T-Shirt Size (Others)"]),
+      tShirtSizeGeneric: findHeaderIndex(["T-Shirt Size", "T-shirt", "TShirt Size", "Tshirt", "T-Shirt", "Shirt Size", "T-Shirt Sizes", "T-Shirt Size (Others)"]),
+      tShirtSizeLeader: findHeaderIndex(["Team Leader's T-shirt Size", "T-shirt Size (Team Leader)"]),
+      tShirtSize2: findHeaderIndex(["2nd Team Member's T-shirt Size", "T-shirt Size (2nd Member)"]),
+      tShirtSize3: findHeaderIndex(["3rd Team Member's T-shirt Size", "T-shirt Size (3rd Member)"]),
+      tShirtSize4: findHeaderIndex(["4th Team Member's T-shirt Size", "T-shirt Size (4th Member)"]),
+      tShirtSize5: findHeaderIndex(["5th Team Member's T-shirt Size", "T-shirt Size (5th Member)"]),
       ieeeMembershipLink: findHeaderIndex([
         "Do any of the team members have an activ IEEE Membership Certificate Link",
         "Do any of the team members have an active IEEE Membership Certificate Link",
@@ -135,7 +140,27 @@ export const UploadPage = () => {
       // Read custom Hackathon team attributes
       const teamName = headerMapping.teamName !== -1 && row[headerMapping.teamName] ? String(row[headerMapping.teamName]).trim() : "";
       const teamMembers = headerMapping.teamMembers !== -1 && row[headerMapping.teamMembers] ? String(row[headerMapping.teamMembers]).trim() : "";
-      const tShirtSize = headerMapping.tShirtSize !== -1 && row[headerMapping.tShirtSize] ? String(row[headerMapping.tShirtSize]).trim() : "";
+      
+      const tsGeneric = headerMapping.tShirtSizeGeneric !== -1 && row[headerMapping.tShirtSizeGeneric] ? String(row[headerMapping.tShirtSizeGeneric]).trim() : "";
+      const tsLeader = headerMapping.tShirtSizeLeader !== -1 && row[headerMapping.tShirtSizeLeader] ? String(row[headerMapping.tShirtSizeLeader]).trim() : "";
+      const ts2 = headerMapping.tShirtSize2 !== -1 && row[headerMapping.tShirtSize2] ? String(row[headerMapping.tShirtSize2]).trim() : "";
+      const ts3 = headerMapping.tShirtSize3 !== -1 && row[headerMapping.tShirtSize3] ? String(row[headerMapping.tShirtSize3]).trim() : "";
+      const ts4 = headerMapping.tShirtSize4 !== -1 && row[headerMapping.tShirtSize4] ? String(row[headerMapping.tShirtSize4]).trim() : "";
+      const ts5 = headerMapping.tShirtSize5 !== -1 && row[headerMapping.tShirtSize5] ? String(row[headerMapping.tShirtSize5]).trim() : "";
+
+      let tShirtSize = "";
+      if (tsLeader || ts2 || ts3 || ts4 || ts5) {
+        const sizes = [];
+        if (tsLeader) sizes.push(`Ldr: ${tsLeader}`);
+        if (ts2) sizes.push(`2nd: ${ts2}`);
+        if (ts3) sizes.push(`3rd: ${ts3}`);
+        if (ts4) sizes.push(`4th: ${ts4}`);
+        if (ts5) sizes.push(`5th: ${ts5}`);
+        tShirtSize = sizes.join(", ");
+      } else {
+        tShirtSize = tsGeneric;
+      }
+
       const ieeeMembershipLink = headerMapping.ieeeMembershipLink !== -1 && row[headerMapping.ieeeMembershipLink] ? String(row[headerMapping.ieeeMembershipLink]).trim() : "";
       const bkashNumber = headerMapping.bkashNumber !== -1 && row[headerMapping.bkashNumber] ? String(row[headerMapping.bkashNumber]).trim() : "";
       const transactionId = headerMapping.transactionId !== -1 && row[headerMapping.transactionId] ? String(row[headerMapping.transactionId]).trim() : "";
