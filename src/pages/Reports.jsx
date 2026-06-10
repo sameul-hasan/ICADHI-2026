@@ -152,13 +152,13 @@ export const Reports = () => {
 
       const baseInfo = {
         "Team ID": p.participantId || "",
-        "Full Name": p.fullName || "",
+        "Team Name": p.teamName || p.fullName || "",
+        "Team Leader Name": p.fullName || "",
         "Email": p.email || "",
         "Phone": p.phone || "",
         "Institution": p.institution || "",
         "Country": p.country || "",
         "Registration Type": p.registrationType || "",
-        "Team Name": p.teamName || "",
         "Team Members": p.teamMembers || "",
         "IEEE Membership Link": p.ieeeMembershipLink || "",
         "bKash Sender Number": p.bkashNumber || "",
@@ -227,7 +227,7 @@ export const Reports = () => {
     {
       type: "breakfast",
       title: "Breakfast Catering Log",
-      description: "Catering logs claiming morning tea logs.",
+      description: "Detailed logs of distributed morning tea and breakfast claims.",
       icon: <CalendarCheck className="h-6 w-6 text-indigo-500" />,
       stats: `${participants.filter(p => p.breakfastCollected).length} / ${participants.length} Claimed`
     },

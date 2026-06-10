@@ -231,7 +231,7 @@ export const Scanner = () => {
             userEmail: currentUserEmail,
             userRole: currentUserRole,
             action: "Participant Checked In",
-            details: `${p.fullName} checked in at Registration Desk`,
+            details: `${p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName} checked in at Registration Desk`,
             timestamp: serverTimestamp()
           });
         }
@@ -263,7 +263,7 @@ export const Scanner = () => {
             userEmail: currentUserEmail,
             userRole: currentUserRole,
             action: "Breakfast Distributed",
-            details: `${p.fullName} received breakfast`,
+            details: `${p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName} received breakfast`,
             timestamp: serverTimestamp()
           });
         }
@@ -295,7 +295,7 @@ export const Scanner = () => {
             userEmail: currentUserEmail,
             userRole: currentUserRole,
             action: "Lunch Distributed",
-            details: `${p.fullName} received lunch`,
+            details: `${p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName} received lunch`,
             timestamp: serverTimestamp()
           });
         }
@@ -330,7 +330,7 @@ export const Scanner = () => {
         userEmail: userProfile?.email || "unknown",
         userRole: role || "volunteer",
         action: "Registration Kit Issued",
-        details: `Issued Registration Kit to ${scannedParticipant.fullName}`,
+        details: `Issued Registration Kit to ${scannedParticipant.teamName ? `${scannedParticipant.teamName} (Leader: ${scannedParticipant.fullName})` : scannedParticipant.fullName}`,
         timestamp: serverTimestamp()
       });
     } catch (err) {
@@ -429,10 +429,17 @@ export const Scanner = () => {
                       </div>
                     )}
 
-                    {/* Corner Guides for camera */}
+                    {/* Modern Corner Guides for camera */}
                     {scanning && (
-                      <div className="absolute inset-8 border-2 border-primary-800/40 rounded-xl pointer-events-none flex items-center justify-center">
-                        <div className="w-full h-0.5 bg-primary-800 absolute animate-bounce" />
+                      <div className="absolute inset-4 sm:inset-6 pointer-events-none">
+                        {/* 4 Corners */}
+                        <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-primary-500 rounded-tl-xl" />
+                        <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-primary-500 rounded-tr-xl" />
+                        <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-primary-500 rounded-bl-xl" />
+                        <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-primary-500 rounded-br-xl" />
+                        
+                        {/* Scanning Laser */}
+                        <div className="absolute left-0 right-0 h-1 bg-primary-500 shadow-[0_0_12px_rgba(59,130,246,0.8)] animate-scan-line rounded-full" />
                       </div>
                     )}
                   </div>

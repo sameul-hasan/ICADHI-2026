@@ -401,7 +401,7 @@ export const EmailCampaigns = () => {
                     onChange={() => handleToggleSelectAttendee(p.id)}
                     className="rounded border-slate-300 dark:border-slate-800 text-primary-850"
                   />
-                  {p.fullName} ({p.email})
+                  {p.teamName ? `${p.teamName} [Leader: ${p.fullName}]` : p.fullName} ({p.email})
                 </label>
               ))}
             </div>

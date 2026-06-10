@@ -227,7 +227,7 @@ export const Templates = () => {
   const getMockHtmlPreview = (html) => {
     if (!html) return "";
     let mock = html;
-    mock = mock.replace(/\{\{fullName\}\}/g, "Dr. Alice Vance");
+    mock = mock.replace(/\{\{fullName\}\}/g, "Team Alpha (Leader: Dr. Alice Vance)");
     mock = mock.replace(/\{\{email\}\}/g, "alice.vance@mit.edu");
     mock = mock.replace(/\{\{institution\}\}/g, "Massachusetts Institute of Technology");
     mock = mock.replace(/\{\{registrationType\}\}/g, "Invited Speaker");

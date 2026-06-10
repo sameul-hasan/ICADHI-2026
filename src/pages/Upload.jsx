@@ -198,7 +198,7 @@ export const UploadPage = () => {
 
       if (p.errors.length > 0) {
         invalidCount++;
-        p.errors.forEach(err => errorsList.push({ row: p.rowNum, name: p.fullName, error: err }));
+        p.errors.forEach(err => errorsList.push({ row: p.rowNum, name: p.teamName ? `${p.teamName} (Leader: ${p.fullName})` : p.fullName, error: err }));
       } else {
         validCount++;
       }
@@ -441,9 +441,13 @@ export const UploadPage = () => {
                       <TableRow key={idx} className={row.errors.length > 0 ? "bg-red-50/30 dark:bg-red-950/10" : ""}>
                         <TableCell className="font-bold text-xs">{row.rowNum}</TableCell>
                         <TableCell>
-                          <div className="font-bold text-slate-850 dark:text-slate-100">{row.fullName}</div>
-                          {row.teamName && (
-                            <span className="text-[10px] text-primary-800 font-bold block mt-0.5">Team: {row.teamName}</span>
+                          {row.teamName ? (
+                            <>
+                              <div className="font-bold text-slate-850 dark:text-slate-100">{row.teamName}</div>
+                              <span className="text-[10px] text-slate-500 font-bold block mt-0.5">Leader: {row.fullName}</span>
+                            </>
+                          ) : (
+                            <div className="font-bold text-slate-850 dark:text-slate-100">{row.fullName}</div>
                           )}
                           {row.errors.length > 0 && (
                             <span className="text-[10px] text-red-500 font-bold block mt-0.5">{row.errors[0]}</span>

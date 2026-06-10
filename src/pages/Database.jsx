@@ -228,7 +228,7 @@ export const DatabasePage = () => {
           userEmail: userProfile?.email || "unknown",
           userRole: userProfile?.role || "admin",
           action: "Participant Profile Updated",
-          details: `Updated info for ${formData.fullName} (${formData.email})`,
+          details: `Updated info for ${formData.teamName ? `${formData.teamName} (Leader: ${formData.fullName})` : formData.fullName} (${formData.email})`,
           timestamp: serverTimestamp()
         });
 
@@ -284,7 +284,7 @@ export const DatabasePage = () => {
           userEmail: userProfile?.email || "unknown",
           userRole: userProfile?.role || "admin",
           action: "Participant Created",
-          details: `Manually added participant: ${formData.fullName} (${formData.email})`,
+          details: `Manually added participant: ${formData.teamName ? `${formData.teamName} (Leader: ${formData.fullName})` : formData.fullName} (${formData.email})`,
           timestamp: serverTimestamp()
         });
 
@@ -309,7 +309,7 @@ export const DatabasePage = () => {
         userEmail: userProfile?.email || "unknown",
         userRole: userProfile?.role || "super_admin",
         action: "Participant Deleted",
-        details: `Deleted participant record: ${selectedPart.fullName} (${selectedPart.email})`,
+        details: `Deleted participant record: ${selectedPart.teamName ? `${selectedPart.teamName} (Leader: ${selectedPart.fullName})` : selectedPart.fullName} (${selectedPart.email})`,
         timestamp: serverTimestamp()
       });
 
@@ -582,7 +582,11 @@ export const DatabasePage = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Full Name</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Team Name</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedPart.teamName || "Individual Participant"}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Team Leader Name</span>
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedPart.fullName}</p>
                 </div>
                 <div>
@@ -605,13 +609,6 @@ export const DatabasePage = () => {
                   <span className="text-[10px] uppercase font-bold text-slate-400">Country</span>
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedPart.country || "N/A"}</p>
                 </div>
-                {/* Team & Hackathon specific fields */}
-                {selectedPart.teamName && (
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Team Name</span>
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{selectedPart.teamName}</p>
-                  </div>
-                )}
                 {selectedPart.ambassadorId && (
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-400">Ambassador ID</span>

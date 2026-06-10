@@ -146,7 +146,7 @@ export const DashboardLayout = ({ children }) => {
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
           <div className="flex items-center gap-3 mb-3">
             <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold uppercase">
-              {userProfile?.fullName?.[0] || "U"}
+              {userProfile?.fullName?.[0]?.toUpperCase() || "U"}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-150 truncate leading-none mb-0.5">
@@ -252,7 +252,7 @@ export const DashboardLayout = ({ children }) => {
             <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-850 flex items-center justify-center text-slate-700 dark:text-slate-300 font-bold uppercase">
-                  {userProfile?.fullName?.[0] || "U"}
+                  {userProfile?.fullName?.[0]?.toUpperCase() || "U"}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate mb-0.5 leading-none">
