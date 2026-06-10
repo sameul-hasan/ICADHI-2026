@@ -3,16 +3,16 @@ import { db } from "../services/firebase";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { 
-  Users, 
-  Mail, 
-  CheckCircle, 
-  Coffee, 
-  Utensils, 
-  Gift, 
-  Clock, 
-  UserPlus, 
-  Activity 
+import {
+  Users,
+  Mail,
+  CheckCircle,
+  Coffee,
+  Utensils,
+  Gift,
+  Clock,
+  UserPlus,
+  Activity
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -138,12 +138,12 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* Title block with live status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-primary-850 to-primary-950 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-950 to-blue-900 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
         {/* Decorative background glow */}
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-secondary-500/20 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">ICADHI 2026 Dashboard</h1>
-          <p className="text-sm text-primary-100 font-medium mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">ICADHI 2026 Dashboard</h1>
+          <p className="text-sm text-blue-100 font-medium mt-1">
             Real-time Registration and Attendance Management Portal
           </p>
         </div>
@@ -264,7 +264,7 @@ export const Dashboard = () => {
                 Waiting for check-in scans...
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={scanTimelineData} margin={{ left: -20, right: 10, top: 10, bottom: 0 }}>
                   <XAxis dataKey="time" stroke="#94a3b8" fontSize={11} fontWeight={600} />
                   <YAxis stroke="#94a3b8" fontSize={11} fontWeight={600} />
@@ -272,8 +272,8 @@ export const Dashboard = () => {
                   <Area type="monotone" dataKey="scans" stroke="#1E40AF" fillOpacity={0.15} fill="url(#colorScans)" strokeWidth={2.5} />
                   <defs>
                     <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1E40AF" stopOpacity={0.25}/>
-                      <stop offset="95%" stopColor="#1E40AF" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#1E40AF" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#1E40AF" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                 </AreaChart>
@@ -365,7 +365,7 @@ export const Dashboard = () => {
                   // Format time
                   const time = log.timestamp?.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
                   const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                  
+
                   return (
                     <div key={log.id} className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors flex gap-3.5 items-start">
                       <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-550 dark:text-slate-400 flex-shrink-0 mt-0.5">
