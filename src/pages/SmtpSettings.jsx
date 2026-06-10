@@ -270,6 +270,39 @@ export const SmtpSettings = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Google Gmail SMTP Guide */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold flex items-center gap-1.5 text-primary-850">
+                <ShieldAlert className="h-4 w-4" /> Google Gmail SMTP Guide
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs space-y-3 leading-relaxed">
+              <p className="text-slate-600 font-semibold">
+                To use a personal **Gmail account** for sending registration emails, configure as follows:
+              </p>
+              <div className="bg-slate-50 dark:bg-slate-950/20 p-2.5 rounded-lg border border-slate-150 font-mono text-[11px] text-slate-700 dark:text-slate-350 space-y-1">
+                <div><span className="text-slate-400">SMTP Host:</span> smtp.gmail.com</div>
+                <div><span className="text-slate-400">SMTP Port:</span> 587 (TLS) or 465 (SSL)</div>
+                <div><span className="text-slate-400">Username:</span> yourgmail@gmail.com</div>
+                <div><span className="text-slate-400">Password:</span> 16-character App Password</div>
+              </div>
+              <div className="space-y-1.5 text-slate-550 dark:text-slate-400">
+                <span className="font-extrabold text-slate-700 dark:text-slate-200 block">Generate a Gmail App Password:</span>
+                <ol className="list-decimal list-inside space-y-1 font-medium">
+                  <li>Enable **2-Step Verification** on your Google Account settings.</li>
+                  <li>Go to Google’s <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-primary-800 hover:text-primary-950 hover:underline font-bold">App Passwords</a> page.</li>
+                  <li>Create a new app credential (e.g. "ICADHI Portal").</li>
+                  <li>Copy and paste the generated 16-character code as your **SMTP Password** (do not use your regular Gmail login password).</li>
+                </ol>
+              </div>
+              <div className="p-2.5 bg-amber-50 border border-amber-150 text-amber-800 rounded-lg text-[11px] font-semibold leading-normal">
+                <strong className="block mb-0.5">⚠️ Delivery Restriction Tip:</strong>
+                Ensure the **From Email Address** matches your **SMTP Username** to prevent Google from rewriting the sender or flags from spam engines.
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
