@@ -1,4 +1,6 @@
-import admin from "firebase-admin";
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
@@ -45,26 +47,27 @@ export default async function handler(req, res) {
   const idToken = authHeader.split("Bearer ")[1];
   try {
     // Initialize Firebase Admin dynamically to catch credentials setup errors
-    if (!admin.apps.length) {
-      let cert = null;
+    if (!getApps().length) {
+      let saCert = null;
       if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-        cert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        if (cert.private_key) {
-          cert.private_key = cert.private_key.replace(/\\n/g, '\n');
+        saCert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        if (saCert.private_key) {
+          saCert.private_key = saCert.private_key.replace(/\\n/g, '\n');
         }
       }
-      if (cert) {
-        admin.initializeApp({
-          credential: admin.credential.cert(cert)
+      if (saCert) {
+        initializeApp({
+          credential: cert(saCert)
         });
       } else {
         throw new Error("FIREBASE_SERVICE_ACCOUNT environment variable is missing or empty. Please check your Vercel Project Settings.");
       }
     }
 
-    const db = admin.firestore();
+    const db = getFirestore();
+    const auth = getAuth();
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await auth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
     // RBAC verification
@@ -150,7 +153,7 @@ export default async function handler(req, res) {
         // Update participant document
         await db.collection("participants").doc(participantId).update({
           emailSent: true,
-          emailSentAt: admin.firestore.FieldValue.serverTimestamp()
+          emailSentAt: FieldValue.serverTimestamp()
         });
 
         batchResults[participantId] = { status: "sent", sentAt: new Date().toISOString() };
@@ -184,7 +187,7 @@ export default async function handler(req, res) {
         sentCount,
         failedCount,
         status,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        updatedAt: FieldValue.serverTimestamp()
       });
     });
 
@@ -196,7 +199,7 @@ export default async function handler(req, res) {
       action: "Emails Sent",
       details: `Processed batch for campaign ${campaignId} (${successCount} succeeded, ${failureCount} failed) via Vercel`,
       ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown",
-      timestamp: admin.firestore.FieldValue.serverTimestamp()
+      timestamp: FieldValue.serverTimestamp()
     });
 
     return res.status(200).json({ success: true, successCount, failureCount });

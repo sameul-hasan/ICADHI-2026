@@ -1,4 +1,6 @@
-import admin from "firebase-admin";
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import crypto from "crypto";
 
 const ALGORITHM = 'aes-256-cbc';
@@ -38,26 +40,27 @@ export default async function handler(req, res) {
   const idToken = authHeader.split("Bearer ")[1];
   try {
     // Initialize Firebase Admin dynamically to catch credentials setup errors
-    if (!admin.apps.length) {
-      let cert = null;
+    if (!getApps().length) {
+      let saCert = null;
       if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-        cert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        if (cert.private_key) {
-          cert.private_key = cert.private_key.replace(/\\n/g, '\n');
+        saCert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        if (saCert.private_key) {
+          saCert.private_key = saCert.private_key.replace(/\\n/g, '\n');
         }
       }
-      if (cert) {
-        admin.initializeApp({
-          credential: admin.credential.cert(cert)
+      if (saCert) {
+        initializeApp({
+          credential: cert(saCert)
         });
       } else {
         throw new Error("FIREBASE_SERVICE_ACCOUNT environment variable is missing or empty. Please check your Vercel Project Settings.");
       }
     }
 
-    const db = admin.firestore();
+    const db = getFirestore();
+    const auth = getAuth();
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await auth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
     // RBAC verification
@@ -81,7 +84,7 @@ export default async function handler(req, res) {
       username,
       fromName: fromName || "ICADHI 2026",
       fromEmail,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp()
     };
 
     if (password && password !== "********") {
@@ -98,7 +101,7 @@ export default async function handler(req, res) {
       action: "SMTP Settings Updated",
       details: "Successfully updated custom SMTP settings (via Vercel Serverless)",
       ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown",
-      timestamp: admin.firestore.FieldValue.serverTimestamp()
+      timestamp: FieldValue.serverTimestamp()
     });
 
     return res.status(200).json({ success: true });
