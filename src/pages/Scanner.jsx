@@ -55,12 +55,7 @@ export const Scanner = () => {
     setActiveDesk(getInitialDesk());
   }, [role]);
 
-  // Clean scanner on unmount
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-  }, []);
+  const lastScanRef = useRef({ text: "", time: 0 });
 
   const startScanner = async () => {
     setResultStatus("idle");
@@ -108,8 +103,27 @@ export const Scanner = () => {
     setScanning(false);
   };
 
+  // Auto-start scanner when the Camera Scan tab is active, stop it otherwise
+  useEffect(() => {
+    if (activeTab === "camera") {
+      startScanner();
+    } else {
+      stopScanner();
+    }
+    return () => {
+      stopScanner();
+    };
+  }, [activeTab]);
+
   // Decode scanned text (supports JSON structure or raw ID)
   const handleDecodedText = async (text) => {
+    const now = Date.now();
+    if (text === lastScanRef.current.text && now - lastScanRef.current.time < 3000) {
+      // Throttle: ignore scans of the exact same QR code within 3 seconds to prevent loops
+      return;
+    }
+    lastScanRef.current = { text, time: now };
+
     // Sound indicator
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -121,7 +135,7 @@ export const Scanner = () => {
       osc.stop(audioCtx.currentTime + 0.1);
     } catch (_) {}
 
-    stopScanner();
+    // We do NOT stop the scanner. The camera remains active all the time!
     let pId = "";
     let sToken = "";
 
@@ -380,7 +394,7 @@ export const Scanner = () => {
                   variant={activeTab === "camera" ? "primary" : "ghost"}
                   size="sm"
                   className="text-xs font-bold"
-                  onClick={() => { setActiveTab("camera"); stopScanner(); }}
+                  onClick={() => setActiveTab("camera")}
                 >
                   Camera Scan
                 </Button>
@@ -388,7 +402,7 @@ export const Scanner = () => {
                   variant={activeTab === "manual" ? "primary" : "ghost"}
                   size="sm"
                   className="text-xs font-bold"
-                  onClick={() => { setActiveTab("manual"); stopScanner(); }}
+                  onClick={() => setActiveTab("manual")}
                 >
                   Manual ID
                 </Button>
@@ -403,7 +417,7 @@ export const Scanner = () => {
               {activeTab === "camera" ? (
                 <div className="flex flex-col items-center gap-4">
                   {/* Scanner Feed Node */}
-                  <div className="relative w-full aspect-square max-w-[280px] bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner">
+                  <div className="relative w-full aspect-square max-w-full sm:max-w-[320px] bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-2xl overflow-hidden flex items-center justify-center shadow-inner">
                     {scanning ? (
                       <div id={qrRegionId} className="w-full h-full object-cover" />
                     ) : (
@@ -471,7 +485,7 @@ export const Scanner = () => {
             <Card className="overflow-hidden">
               {/* Dynamic Status Banner */}
               {resultStatus === "success" && (
-                <div className="bg-emerald-500 text-white p-5 flex items-center gap-4 shadow-md">
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-5 flex items-center gap-4 shadow-md">
                   <CheckCircle2 className="h-12 w-12 flex-shrink-0 animate-scale-in" />
                   <div>
                     <h2 className="text-lg font-black uppercase tracking-wider">Verification Successful</h2>
@@ -481,8 +495,8 @@ export const Scanner = () => {
               )}
 
               {resultStatus === "duplicate" && (
-                <div className="bg-amber-500 text-white p-5 flex items-center gap-4 shadow-md">
-                  <AlertTriangle className="h-12 w-12 flex-shrink-0" />
+                <div className="bg-gradient-to-r from-amber-500 to-orange-550 text-white p-5 flex items-center gap-4 shadow-md">
+                  <AlertTriangle className="h-12 w-12 flex-shrink-0 animate-bounce" />
                   <div>
                     <h2 className="text-lg font-black uppercase tracking-wider">Already Claimed</h2>
                     <p className="text-xs font-semibold text-amber-100">
@@ -493,11 +507,11 @@ export const Scanner = () => {
               )}
 
               {resultStatus === "invalid" && (
-                <div className="bg-rose-500 text-white p-5 flex items-center gap-4 shadow-md">
+                <div className="bg-gradient-to-r from-rose-500 to-red-600 text-white p-5 flex items-center gap-4 shadow-md">
                   <XCircle className="h-12 w-12 flex-shrink-0" />
                   <div>
                     <h2 className="text-lg font-black uppercase tracking-wider">Invalid Ticket</h2>
-                    <p className="text-xs font-semibold text-rose-105">Failed authentication. Record does not match.</p>
+                    <p className="text-xs font-semibold text-rose-100">Failed authentication. Record does not match.</p>
                   </div>
                 </div>
               )}

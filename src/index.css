@@ -69,3 +69,26 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-600;
 }
+
+/* QR Scanner Camera cover scaling */
+#qr-reader-region {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+#qr-reader-region video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 1rem !important;
+}
+
+/* Override html5-qrcode inline styles */
+#qr-reader-region__scan_region {
+  background: transparent !important;
+}
+#qr-reader-region__dashboard {
+  display: none !important;
+}
+
