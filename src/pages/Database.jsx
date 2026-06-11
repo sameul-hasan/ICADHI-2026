@@ -451,6 +451,7 @@ export const DatabasePage = () => {
                   <TableHead>Team / Leader</TableHead>
                   <TableHead>Institution</TableHead>
                   <TableHead>Reg Type</TableHead>
+                  <TableHead>T-Shirt</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead>Check-in</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -475,6 +476,7 @@ export const DatabasePage = () => {
                     </TableCell>
                     <TableCell className="truncate max-w-[150px]">{p.institution || <span className="text-slate-400 italic">None</span>}</TableCell>
                     <TableCell><Badge variant="neutral">{p.registrationType}</Badge></TableCell>
+                    <TableCell className="truncate max-w-[120px] text-xs font-semibold text-slate-600" title={p.tShirtSize}>{p.tShirtSize || "N/A"}</TableCell>
                     <TableCell>
                       <Badge variant={p.paymentStatus?.toLowerCase() === "paid" ? "success" : "warning"}>
                         {p.paymentStatus}

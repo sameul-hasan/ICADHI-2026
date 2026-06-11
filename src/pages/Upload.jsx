@@ -462,6 +462,7 @@ export const UploadPage = () => {
                       <TableHead>Phone</TableHead>
                       <TableHead>Institution</TableHead>
                       <TableHead>Type</TableHead>
+                      <TableHead>T-Shirts</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -486,6 +487,7 @@ export const UploadPage = () => {
                         <TableCell>{row.phone}</TableCell>
                         <TableCell className="max-w-[150px] truncate">{row.institution}</TableCell>
                         <TableCell><Badge variant="neutral">{row.registrationType}</Badge></TableCell>
+                        <TableCell className="text-xs truncate max-w-[120px]" title={row.tShirtSize}>{row.tShirtSize}</TableCell>
                         <TableCell>
                           <Badge variant={row.paymentStatus.toLowerCase() === "paid" ? "success" : "warning"}>
                             {row.paymentStatus}

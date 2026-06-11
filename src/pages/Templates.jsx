@@ -227,7 +227,8 @@ export const Templates = () => {
   const getMockHtmlPreview = (html) => {
     if (!html) return "";
     let mock = html;
-    mock = mock.replace(/\{\{fullName\}\}/g, "Team Alpha (Leader: Dr. Alice Vance)");
+    mock = mock.replace(/\{\{fullName\}\}/g, "Dr. Alice Vance");
+    mock = mock.replace(/\{\{teamName\}\}/g, "Team Alpha");
     mock = mock.replace(/\{\{email\}\}/g, "alice.vance@mit.edu");
     mock = mock.replace(/\{\{institution\}\}/g, "Massachusetts Institute of Technology");
     mock = mock.replace(/\{\{registrationType\}\}/g, "Invited Speaker");
@@ -375,7 +376,7 @@ export const Templates = () => {
               <div>
                 <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Supported Variables</h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {["{{fullName}}", "{{email}}", "{{institution}}", "{{registrationType}}", "{{qrCode}}", "{{eventName}}"].map(v => (
+                  {["{{fullName}}", "{{teamName}}", "{{email}}", "{{institution}}", "{{registrationType}}", "{{qrCode}}", "{{eventName}}"].map(v => (
                     <code
                       key={v}
                       className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded text-[10px] font-bold text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200 transition-colors"
