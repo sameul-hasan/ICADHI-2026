@@ -18,6 +18,8 @@ import { UsersPage } from "./pages/Users";
 import { AuditLogs } from "./pages/AuditLogs";
 import { Reports } from "./pages/Reports";
 import { AccessHierarchy } from "./pages/AccessHierarchy";
+import { Volunteer } from "./pages/Volunteer";
+import { Ambassador } from "./pages/Ambassador";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +99,9 @@ export const App = () => {
                         
                         {/* Attendee Database (All Logged In can view) */}
                         <Route path="/database" element={<DatabasePage />} />
+                        
+                        <Route path="/volunteers" element={<Volunteer />} />
+                        <Route path="/ambassadors" element={<Ambassador />} />
                         
                         {/* Excel Upload (Admins & Super Admin) */}
                         <Route 

@@ -96,6 +96,20 @@ service cloud.firestore {
       );
     }
 
+    // Volunteers collection rules
+    match /volunteers/{volunteerId} {
+      allow read: if isVolunteer();
+      allow create, update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // Ambassadors collection rules
+    match /ambassadors/{ambassadorId} {
+      allow read: if isVolunteer();
+      allow create, update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
     // 3. SMTP settings rules: Only accessible by Admin
     match /smtpSettings/{document} {
       allow read, write: if isAdmin();

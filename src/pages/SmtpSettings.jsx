@@ -6,7 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { ShieldAlert, Server, TestTube, CheckCircle2, AlertOctagon } from "lucide-react";
+import { ShieldAlert, Server, TestTube, CheckCircle2, AlertOctagon, Send } from "lucide-react";
 
 export const SmtpSettings = () => {
   const { isSuperAdmin } = useAuth();
@@ -25,6 +25,10 @@ export const SmtpSettings = () => {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null); // success | error | null
+
+  const [testEmailAddress, setTestEmailAddress] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendEmailResult, setSendEmailResult] = useState(null);
 
   // Fetch settings on mount
   useEffect(() => {
@@ -120,6 +124,41 @@ export const SmtpSettings = () => {
       showToast(`Test failed: ${err.message}`, "error");
     } finally {
       setTesting(false);
+    }
+  };
+
+  const handleSendTestEmail = async (e) => {
+    e.preventDefault();
+    if (!testEmailAddress) {
+      showToast("Please enter a destination email address", "warning");
+      return;
+    }
+    setSendingEmail(true);
+    setSendEmailResult(null);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/sendTestEmail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ targetEmail: testEmailAddress })
+      });
+      
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send test email");
+      }
+      
+      setSendEmailResult({ status: "success", message: result.message });
+      showToast(`Test email successfully sent to ${testEmailAddress}`, "success");
+    } catch (err) {
+      console.error(err);
+      setSendEmailResult({ status: "error", message: err.message });
+      showToast(`Failed to send test email: ${err.message}`, "error");
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -267,6 +306,43 @@ export const SmtpSettings = () => {
                     </p>
                   </div>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Send Test Email Console */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2"><Send className="h-4 w-4 text-primary-800" /> Dispatch Test Email</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <form onSubmit={handleSendTestEmail} className="flex gap-2">
+                <div className="flex-1">
+                  <Input 
+                    placeholder="Enter email to receive test message" 
+                    type="email" 
+                    value={testEmailAddress}
+                    onChange={(e) => setTestEmailAddress(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" disabled={sendingEmail || !testEmailAddress} loading={sendingEmail} className="shrink-0">
+                  Send Test Email
+                </Button>
+              </form>
+              
+              {sendEmailResult && (
+                sendEmailResult.status === "success" ? (
+                  <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/60 rounded-lg flex items-start gap-2 text-xs text-emerald-900 dark:text-emerald-350">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>{sendEmailResult.message}</div>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-red-50/50 dark:bg-red-950/20 border border-red-150 dark:border-red-900/40 rounded-lg flex items-start gap-2 text-xs text-red-900 dark:text-red-350">
+                    <AlertOctagon className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                    <div>{sendEmailResult.message}</div>
+                  </div>
+                )
               )}
             </CardContent>
           </Card>

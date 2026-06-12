@@ -16,7 +16,9 @@ import {
   Menu, 
   X, 
   Sun, 
-  Moon 
+  Moon,
+  HeartHandshake,
+  Award
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -61,6 +63,18 @@ export const DashboardLayout = ({ children }) => {
       path: "/database", 
       icon: <Database className="h-5 w-5" />, 
       show: true 
+    },
+    { 
+      name: "Volunteers", 
+      path: "/volunteers", 
+      icon: <HeartHandshake className="h-5 w-5" />, 
+      show: isAdmin || isRegDesk 
+    },
+    { 
+      name: "Ambassadors", 
+      path: "/ambassadors", 
+      icon: <Award className="h-5 w-5" />, 
+      show: isAdmin || isRegDesk 
     },
     { 
       name: "Excel Upload", 

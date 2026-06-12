@@ -1,0 +1,127 @@
+import nodemailer from "nodemailer";
+import crypto from "crypto";
+
+const ALGORITHM = 'aes-256-cbc';
+const SECRET_KEY = process.env.ENCRYPTION_KEY || 'icadhi-2026-secret-key-32chars!';
+
+function decrypt(text) {
+  try {
+    const [ivHex, encryptedText] = text.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+    const key = crypto.createHash('sha256').update(String(SECRET_KEY)).digest();
+    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (err) {
+    console.error("Decryption failed:", err);
+    return null;
+  }
+}
+
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  const { targetEmail, subject, text, html } = req.body;
+  if (!targetEmail) {
+    return res.status(400).json({ error: "Missing targetEmail in request body" });
+  }
+
+  // Auth check
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthenticated request" });
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  try {
+    // Dynamically load firebase-admin sub-packages
+    const { initializeApp, getApps, cert } = await import('firebase-admin/app');
+    const { getFirestore } = await import('firebase-admin/firestore');
+    const { getAuth } = await import('firebase-admin/auth');
+
+    if (!getApps().length) {
+      let saCert = null;
+      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        saCert = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        if (saCert.private_key) {
+          saCert.private_key = saCert.private_key.replace(/\\n/g, '\n');
+        }
+      }
+      if (saCert) {
+        initializeApp({
+          credential: cert(saCert)
+        });
+      } else {
+        throw new Error("FIREBASE_SERVICE_ACCOUNT environment variable is missing or empty.");
+      }
+    }
+
+    const db = getFirestore();
+    const auth = getAuth();
+
+    const decodedToken = await auth.verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+
+    // RBAC verification
+    const userDoc = await db.collection("users").doc(uid).get();
+    if (!userDoc.exists) {
+      return res.status(403).json({ error: "User profile not found" });
+    }
+    const role = userDoc.data().role;
+    if (role !== "super_admin" && role !== "admin") {
+      return res.status(403).json({ error: "Access Denied: Admin permissions required" });
+    }
+
+    // Load SMTP credentials
+    const smtpDoc = await db.collection("smtpSettings").doc("default").get();
+    if (!smtpDoc.exists) {
+      return res.status(404).json({ error: "SMTP settings not configured" });
+    }
+
+    const settings = smtpDoc.data();
+    const decryptedPassword = decrypt(settings.encryptedPassword);
+    if (!decryptedPassword) {
+      return res.status(500).json({ error: "Failed to decrypt SMTP credentials" });
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: settings.host,
+      port: settings.port,
+      secure: settings.port === 465,
+      auth: {
+        user: settings.username,
+        pass: decryptedPassword
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000
+    });
+
+    const mailOptions = {
+      from: `"${settings.fromName || 'ICADHI 2026'}" <${settings.fromEmail}>`,
+      to: targetEmail,
+      subject: subject || "Test Email from ICADHI 2026 System",
+      text: text || "This is a test email sent from the ICADHI 2026 dashboard.",
+      html: html || `<p>This is a <b>test email</b> sent from the ICADHI 2026 dashboard.</p>`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return res.status(200).json({ success: true, message: `Email sent to ${targetEmail}`, messageId: info.messageId });
+  } catch (err) {
+    console.error("Test email failure:", err);
+    return res.status(500).json({ error: err.message });
+  }
+}
