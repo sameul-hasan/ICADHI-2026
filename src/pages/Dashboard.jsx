@@ -3,6 +3,7 @@ import { db } from "../services/firebase";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
+import { Select } from "../components/ui/Select";
 import { InstructionBanner } from "../components/ui/InstructionBanner";
 import {
   Users,
@@ -32,6 +33,7 @@ import {
 } from "recharts";
 
 export const Dashboard = () => {
+  const [activeView, setActiveView] = useState("participants"); // participants | volunteers | ambassadors
   const [participants, setParticipants] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [ambassadors, setAmbassadors] = useState([]);
@@ -97,16 +99,18 @@ export const Dashboard = () => {
   }, []);
 
   // Compute Metrics
-  const totalParticipants = participants.length;
-  const emailsSent = participants.filter(p => p.emailSent).length;
-  const checkedIn = participants.filter(p => p.registrationScanned).length;
-  const kitsCollected = participants.filter(p => p.kitCollected).length;
-  const breakfastCollected = participants.filter(p => p.breakfastCollected).length;
-  const lunchCollected = participants.filter(p => p.lunchCollected).length;
+  const currentData = activeView === "participants" ? participants : activeView === "volunteers" ? volunteers : ambassadors;
+
+  const totalParticipants = currentData.length;
+  const emailsSent = currentData.filter(p => p.emailSent).length;
+  const checkedIn = currentData.filter(p => p.registrationScanned).length;
+  const kitsCollected = currentData.filter(p => p.kitCollected).length;
+  const breakfastCollected = currentData.filter(p => p.breakfastCollected).length;
+  const lunchCollected = currentData.filter(p => p.lunchCollected).length;
 
   // Breakdown of Registration Types
-  const regTypeCounts = participants.reduce((acc, p) => {
-    const type = p.registrationType || "Unknown";
+  const regTypeCounts = currentData.reduce((acc, p) => {
+    const type = p.registrationType || p.designation || p.universityName || "Unknown";
     acc[type] = (acc[type] || 0) + 1;
     return acc;
   }, {});
@@ -122,7 +126,7 @@ export const Dashboard = () => {
   // Let's group scans by day and hour for an interactive Area chart
   const scanTimelineData = (() => {
     const hours = {};
-    participants.forEach(p => {
+    currentData.forEach(p => {
       if (p.registrationScanned && p.registrationScannedAt) {
         // Convert Firestore timestamp to Date
         const date = p.registrationScannedAt.toDate ? p.registrationScannedAt.toDate() : new Date(p.registrationScannedAt);
@@ -182,9 +186,21 @@ export const Dashboard = () => {
             Real-time Registration and Attendance Management Portal
           </p>
         </div>
-        <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl text-xs font-bold self-start sm:self-center">
-          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-          Live Connection Active
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 z-10">
+          <Select
+            value={activeView}
+            onChange={(e) => setActiveView(e.target.value)}
+            className="w-48 text-sm font-bold bg-white/10 border-white/20 text-white [&>option]:text-slate-800"
+            options={[
+              { value: "participants", label: "Participants View" },
+              { value: "volunteers", label: "Organizers View" },
+              { value: "ambassadors", label: "Ambassadors View" }
+            ]}
+          />
+          <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-xl text-xs font-bold shrink-0">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+            Live Connection
+          </div>
         </div>
       </div>
 
@@ -280,34 +296,6 @@ export const Dashboard = () => {
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-1">
                 {totalParticipants ? Math.round((lunchCollected / totalParticipants) * 100) : 0}% of total
               </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Team Overview Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4">
-        <Card variant="glass" className="hover:-translate-y-1">
-          <CardContent className="p-4 flex flex-col justify-between h-full">
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Organizers</span>
-              <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300"><Users className="h-4.5 w-4.5" /></div>
-            </div>
-            <div className="mt-4">
-              <span className="text-2xl font-black text-slate-800 dark:text-white leading-none">{volunteers.length}</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-1">Organizing Committee</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="hover:-translate-y-1">
-          <CardContent className="p-4 flex flex-col justify-between h-full">
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Ambassadors</span>
-              <div className="p-1.5 rounded-lg bg-pink-100 dark:bg-pink-950 text-pink-800 dark:text-pink-300"><Users className="h-4.5 w-4.5" /></div>
-            </div>
-            <div className="mt-4">
-              <span className="text-2xl font-black text-slate-800 dark:text-white leading-none">{ambassadors.length}</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-1">Campus Ambassadors</span>
             </div>
           </CardContent>
         </Card>
