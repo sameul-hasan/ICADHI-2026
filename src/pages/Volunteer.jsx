@@ -6,7 +6,8 @@ import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
-import { Upload, FileSpreadsheet } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
+import { Upload, FileSpreadsheet, Info } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export const Volunteer = () => {
@@ -143,6 +144,13 @@ export const Volunteer = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="Organizers Management" icon={Info} color="purple">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Supported Columns:</strong> Upload an Excel file with columns for Full Name, Email, Contact, Designation, T-shirt Size, and Dept/University.</li>
+          <li><strong>Usage:</strong> Organizers added here can be selected as the target audience in the Email Campaigns engine to send out mass updates.</li>
+        </ul>
+      </InstructionBanner>
+
       <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-xl font-bold">Organizers Database</h1>

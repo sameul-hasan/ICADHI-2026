@@ -6,7 +6,8 @@ import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { ShieldAlert, Server, TestTube, CheckCircle2, AlertOctagon, Send } from "lucide-react";
+import { ShieldAlert, Server, TestTube, CheckCircle2, AlertOctagon, Send, Lightbulb } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 
 export const SmtpSettings = () => {
   const { isSuperAdmin } = useAuth();
@@ -179,8 +180,16 @@ export const SmtpSettings = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
+    <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full">
+      <InstructionBanner title="SMTP Configuration" icon={Lightbulb} color="amber">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Gmail Users:</strong> Do NOT use your regular Gmail password. You must generate an "App Password" from your Google Account Security settings.</li>
+          <li><strong>Testing:</strong> Always use the "Send Test Email" button to verify your credentials work before launching a real campaign.</li>
+          <li><strong>Security:</strong> Your password is symmetrically AES-256 encrypted before being stored in the database.</li>
+        </ul>
+      </InstructionBanner>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-xl font-bold">SMTP Mailer Settings</h1>
           <p className="text-xs text-slate-500 mt-0.5 font-medium">Configure server credentials for sending confirmation emails</p>

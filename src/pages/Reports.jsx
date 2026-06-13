@@ -15,8 +15,11 @@ import {
   Activity,
   CheckCircle,
   CalendarCheck,
-  Award
+  Award,
+  XCircle,
+  Info
 } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
@@ -249,6 +252,13 @@ export const Reports = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="Analytics & Export" icon={Info} color="purple">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Download:</strong> Click "Export Detailed CSV" to download the full, latest spreadsheet of all attendees and their check-in timestamps.</li>
+          <li><strong>Print:</strong> Click "Download PDF Report" to generate a beautiful, printable summary of your event's statistics.</li>
+        </ul>
+      </InstructionBanner>
+
       {/* Title Header */}
       <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>

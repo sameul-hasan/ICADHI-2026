@@ -20,8 +20,10 @@ import {
   Utensils, 
   Coffee, 
   User, 
-  CalendarClock 
+  CalendarClock,
+  HelpCircle
 } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 
 export const Scanner = () => {
   const { userProfile, role, isAdmin, isSuperAdmin, isRegDesk, isBreakfastDesk, isLunchDesk } = useAuth();
@@ -355,6 +357,14 @@ export const Scanner = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="Scanner Usage" icon={HelpCircle} color="emerald">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Select Mode:</strong> Choose between "Registration Check-in", "Kits", "Breakfast", or "Lunch" mode before scanning.</li>
+          <li><strong>Camera Setup:</strong> Grant camera permissions. Scan the attendee's QR code (received via email).</li>
+          <li><strong>Signals:</strong> Green means successful check-in. Red means they already claimed it or the code is invalid. Listen for the beep sounds!</li>
+        </ul>
+      </InstructionBanner>
+
       {/* Settings bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>

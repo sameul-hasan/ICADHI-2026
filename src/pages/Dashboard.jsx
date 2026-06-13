@@ -3,6 +3,7 @@ import { db } from "../services/firebase";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 import {
   Users,
   Mail,
@@ -12,7 +13,8 @@ import {
   Gift,
   Clock,
   UserPlus,
-  Activity
+  Activity,
+  Lightbulb
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -137,6 +139,13 @@ export const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="Dashboard Overview" icon={Lightbulb} color="blue">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Real-time Metrics:</strong> All numbers update automatically as participants register or scan QR codes.</li>
+          <li><strong>Live Feed:</strong> Watch the Activity Feed (bottom right) to monitor exactly what your team is doing right now.</li>
+        </ul>
+      </InstructionBanner>
+
       {/* Title block with live status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-950 to-blue-900 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
         {/* Decorative background glow */}

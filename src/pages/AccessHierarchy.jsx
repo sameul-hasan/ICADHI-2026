@@ -1,7 +1,8 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/Button";
-import { ShieldCheck, LogOut, KeyRound, Award, Users, ScanLine, Clock } from "lucide-react";
+import { ShieldCheck, LogOut, KeyRound, Award, Users, ScanLine, Clock, HelpCircle } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 
 export const AccessHierarchy = () => {
   const { userProfile, logout } = useAuth();
@@ -40,8 +41,16 @@ export const AccessHierarchy = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-8">
-      <div className="w-full max-w-2xl bg-white border border-slate-200 shadow-xl rounded-2xl p-6 sm:p-10 flex flex-col gap-8">
+    <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full p-4 sm:p-8">
+      <InstructionBanner title="Role Management" icon={HelpCircle} color="blue">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Super Admin:</strong> Full access to everything, including deleting data and assigning roles.</li>
+          <li><strong>Admin:</strong> Can edit participants and send emails, but cannot delete records or manage roles.</li>
+          <li><strong>Organizers/Desks:</strong> Can access the Scanner and view the Database, but cannot edit settings or send emails.</li>
+        </ul>
+      </InstructionBanner>
+
+      <div className="w-full bg-white border border-slate-200 shadow-xl rounded-2xl p-6 sm:p-10 flex flex-col gap-8">
         
         {/* Branding header */}
         <div className="flex flex-col items-center text-center gap-3">

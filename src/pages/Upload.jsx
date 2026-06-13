@@ -7,7 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { Badge } from "../components/ui/Badge";
-import { Upload, FileSpreadsheet, CheckCircle, AlertTriangle, AlertCircle, Play, RefreshCw } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
+import { Upload, FileSpreadsheet, CheckCircle, AlertTriangle, AlertCircle, Play, RefreshCw, HelpCircle } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export const UploadPage = () => {
@@ -393,6 +394,14 @@ export const UploadPage = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="How to Import Data" icon={HelpCircle} color="emerald">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Format:</strong> Only <code>.xlsx</code> or <code>.xls</code> files are supported.</li>
+          <li><strong>Required Columns:</strong> Your file MUST have exactly these column headers: <code className="bg-emerald-100 dark:bg-emerald-800 px-1 rounded">id</code>, <code className="bg-emerald-100 dark:bg-emerald-800 px-1 rounded">name</code>, <code className="bg-emerald-100 dark:bg-emerald-800 px-1 rounded">email</code>. Optional: phone, institution, country, payment.</li>
+          <li><strong>Drag & Drop:</strong> Simply drop your file into the dashed box to instantly upload the list. Duplicates will be safely ignored.</li>
+        </ul>
+      </InstructionBanner>
+
       <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
           <h1 className="text-xl font-bold">Import Participants</h1>

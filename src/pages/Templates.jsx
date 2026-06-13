@@ -17,7 +17,8 @@ import { Input } from "../components/ui/Input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { Dialog } from "../components/ui/Dialog";
 import { Badge } from "../components/ui/Badge";
-import { FileCode, Plus, Eye, Edit, Trash2, Copy, Sparkles } from "lucide-react";
+import { FileCode, Plus, Eye, Edit, Trash2, Copy, Sparkles, Lightbulb } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 
 export const Templates = () => {
   const { userProfile } = useAuth();
@@ -239,6 +240,14 @@ export const Templates = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="Email Templates" icon={Lightbulb} color="blue">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Smart Tags:</strong> Use variables like <code>{`{{fullName}}`}</code>, <code>{`{{email}}`}</code>, and <code>{`{{teamName}}`}</code>. They will be auto-replaced for each recipient!</li>
+          <li><strong>QR Code:</strong> Include the <code>{`{{qrCode}}`}</code> tag to automatically embed their unique, secure registration QR code in the email.</li>
+          <li><strong>HTML Allowed:</strong> You can write full HTML for custom branding, colors, and layouts.</li>
+        </ul>
+      </InstructionBanner>
+
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>

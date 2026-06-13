@@ -16,7 +16,8 @@ import { Select } from "../components/ui/Select";
 import { Badge } from "../components/ui/Badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { Dialog } from "../components/ui/Dialog";
-import { Mail, Play, AlertCircle, RefreshCw, Send, CheckCircle, Flame } from "lucide-react";
+import { Mail, Play, AlertCircle, RefreshCw, Send, CheckCircle, Flame, Info } from "lucide-react";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 
 export const EmailCampaigns = () => {
   const { userProfile } = useAuth();
@@ -295,6 +296,14 @@ export const EmailCampaigns = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      <InstructionBanner title="Email Campaigns Engine" icon={Info} color="amber">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Target Audience:</strong> You can broadcast emails to Attendees, Organizers, or Ambassadors.</li>
+          <li><strong>Safe Sending:</strong> The system automatically batches emails into safe chunks of 100 to prevent server timeouts and spam blocking.</li>
+          <li><strong>Retries:</strong> If an email fails to deliver, you can use the "Retry Failed" button next to the campaign to resend only the failed ones.</li>
+        </ul>
+      </InstructionBanner>
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>

@@ -16,6 +16,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Select } from "../components/ui/Select";
+import { InstructionBanner } from "../components/ui/InstructionBanner";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { Badge } from "../components/ui/Badge";
 import { Dialog } from "../components/ui/Dialog";
@@ -30,7 +31,9 @@ import {
   Download, 
   Calendar, 
   UserRoundCheck,
-  UserCheck 
+  UserCheck,
+  Upload,
+  Info
 } from "lucide-react";
 
 export const DatabasePage = () => {
@@ -346,7 +349,15 @@ export const DatabasePage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 h-full pb-10">
+      <InstructionBanner title="Participants Database Guide" icon={Info} color="amber">
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Search & Filter:</strong> Use the search bar to find attendees quickly. Filter by Registration Type or Payment Status.</li>
+          <li><strong>Actions:</strong> Click the <strong>View</strong> icon to open the participant profile, generate QR codes manually, or delete records.</li>
+          <li><strong>Manual Registration:</strong> Click <strong>+ Add Participant</strong> to register someone at the desk directly.</li>
+        </ul>
+      </InstructionBanner>
+
       {/* Table Title and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
