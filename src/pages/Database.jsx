@@ -350,7 +350,7 @@ export const DatabasePage = () => {
       {/* Table Title and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl font-bold">Participant Database</h1>
+          <h1 className="text-xl font-bold">Participants</h1>
           <p className="text-xs text-slate-500 mt-0.5">Manage all registered delegates and check-in logs</p>
         </div>
         {isAdmin && (

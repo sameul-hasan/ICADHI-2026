@@ -25,6 +25,8 @@ export const EmailCampaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [participants, setParticipants] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [ambassadors, setAmbassadors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modal / Wizard state
@@ -33,6 +35,7 @@ export const EmailCampaigns = () => {
   
   // Campaign creator states
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [audience, setAudience] = useState("participants"); // participants | volunteers | ambassadors
   const [targetType, setTargetType] = useState("all"); // all | failed | selected
   const [selectedAttendeeIds, setSelectedAttendeeIds] = useState([]);
   
@@ -65,23 +68,42 @@ export const EmailCampaigns = () => {
       setLoading(false);
     });
 
+    const unsubVols = onSnapshot(collection(db, "volunteers"), (snap) => {
+      const list = [];
+      snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+      setVolunteers(list);
+    });
+
+    const unsubAmbs = onSnapshot(collection(db, "ambassadors"), (snap) => {
+      const list = [];
+      snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+      setAmbassadors(list);
+    });
+
     return () => {
       unsubCamp();
       unsubTemp();
       unsubParts();
+      unsubVols();
+      unsubAmbs();
     };
   }, []);
 
   // Filter recipient list based on selection logic
   const getRecipients = () => {
+    let sourceList = [];
+    if (audience === "participants") sourceList = participants;
+    else if (audience === "volunteers") sourceList = volunteers;
+    else if (audience === "ambassadors") sourceList = ambassadors;
+
     if (targetType === "all") {
-      return participants;
+      return sourceList;
     }
     if (targetType === "failed") {
-      return participants.filter(p => !p.emailSent);
+      return sourceList.filter(p => !p.emailSent);
     }
     if (targetType === "selected") {
-      return participants.filter(p => selectedAttendeeIds.includes(p.id));
+      return sourceList.filter(p => selectedAttendeeIds.includes(p.id));
     }
     return [];
   };
@@ -127,6 +149,7 @@ export const EmailCampaigns = () => {
       // 1. Create emailCampaign document in Firestore
       const campaignRef = await addDoc(collection(db, "emailCampaigns"), {
         templateId: selectedTemplateId,
+        audience,
         status: "pending",
         totalRecipients: totalCount,
         sentCount: 0,
@@ -158,6 +181,7 @@ export const EmailCampaigns = () => {
           },
           body: JSON.stringify({
             campaignId,
+            recipientType: audience,
             participantIds: chunk
           })
         });
@@ -245,6 +269,7 @@ export const EmailCampaigns = () => {
           },
           body: JSON.stringify({
             campaignId: campaign.id,
+            recipientType: campaign.audience || "participants",
             participantIds: chunk
           })
         });
@@ -296,6 +321,7 @@ export const EmailCampaigns = () => {
               <TableRow>
                 <TableHead>Campaign ID</TableHead>
                 <TableHead>Template Used</TableHead>
+                <TableHead>Audience</TableHead>
                 <TableHead>Recipients</TableHead>
                 <TableHead>Delivered</TableHead>
                 <TableHead>Failed</TableHead>
@@ -315,6 +341,7 @@ export const EmailCampaigns = () => {
                   <TableRow key={camp.id}>
                     <TableCell className="font-mono text-xs font-bold text-slate-500">{camp.id}</TableCell>
                     <TableCell className="font-bold text-slate-800 dark:text-slate-100">{templateName}</TableCell>
+                    <TableCell className="capitalize text-slate-600">{camp.audience || "participants"}</TableCell>
                     <TableCell className="font-bold">{total}</TableCell>
                     <TableCell className="text-emerald-600 dark:text-emerald-400 font-bold">
                       {sent} ({deliveryRate}%)
@@ -373,9 +400,25 @@ export const EmailCampaigns = () => {
             required
           />
 
-          {/* Step 2: Choose Target Selection */}
+          {/* New Step: Audience */}
           <Select
-            label="2. Choose Targets Criteria"
+            label="2. Choose Audience"
+            value={audience}
+            onChange={(e) => {
+              setAudience(e.target.value);
+              setSelectedAttendeeIds([]);
+            }}
+            placeholder=""
+            options={[
+              { value: "participants", label: "Attendees (Participants)" },
+              { value: "volunteers", label: "Organizers" },
+              { value: "ambassadors", label: "Ambassadors" }
+            ]}
+          />
+
+          {/* Step 3: Choose Target Selection */}
+          <Select
+            label="3. Choose Targets Criteria"
             value={targetType}
             onChange={(e) => {
               setTargetType(e.target.value);
@@ -393,7 +436,7 @@ export const EmailCampaigns = () => {
           {targetType === "selected" && (
             <div className="border border-slate-200 dark:border-slate-800 rounded-lg max-h-[160px] overflow-y-auto p-3 bg-slate-50 dark:bg-slate-950 space-y-2">
               <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Attendee List Checklist</span>
-              {participants.map(p => (
+              {(audience === "participants" ? participants : audience === "volunteers" ? volunteers : ambassadors).map(p => (
                 <label key={p.id} className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-350 cursor-pointer">
                   <input
                     type="checkbox"
@@ -401,7 +444,7 @@ export const EmailCampaigns = () => {
                     onChange={() => handleToggleSelectAttendee(p.id)}
                     className="rounded border-slate-300 dark:border-slate-800 text-primary-850"
                   />
-                  {p.teamName ? `${p.teamName} [Leader: ${p.fullName}]` : p.fullName} ({p.email})
+                  {p.teamName || p.designation ? `${p.teamName || p.designation} [Name: ${p.fullName}]` : p.fullName} ({p.email})
                 </label>
               ))}
             </div>

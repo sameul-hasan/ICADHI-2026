@@ -100,7 +100,7 @@ export const Volunteer = () => {
         await batch.commit();
         committed += chunk.length;
       }
-      showToast(`Successfully imported ${committed} volunteers.`, "success");
+      showToast(`Successfully imported ${committed} organizers.`, "success");
     } catch (err) {
       console.error(err);
       showToast(`Import failed: ${err.message}`, "error");
@@ -145,8 +145,8 @@ export const Volunteer = () => {
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl font-bold">Volunteers Database</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Manage and import volunteer data</p>
+          <h1 className="text-xl font-bold">Organizers Database</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Manage and import organizer data</p>
         </div>
       </div>
 
@@ -177,13 +177,13 @@ export const Volunteer = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Volunteers List</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Organizers List</CardTitle>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Volunteer ID</TableHead>
+                <TableHead>Organizer ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
@@ -206,7 +206,7 @@ export const Volunteer = () => {
               ))}
               {volunteers.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">No volunteers found</TableCell>
+                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">No organizers found</TableCell>
                 </TableRow>
               )}
             </TableBody>

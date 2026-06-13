@@ -59,13 +59,13 @@ export const DashboardLayout = ({ children }) => {
       show: isRegDesk || isBreakfastDesk || isLunchDesk 
     },
     { 
-      name: "Participant DB", 
+      name: "Participants", 
       path: "/database", 
       icon: <Database className="h-5 w-5" />, 
       show: true 
     },
     { 
-      name: "Volunteers", 
+      name: "Organizers", 
       path: "/volunteers", 
       icon: <HeartHandshake className="h-5 w-5" />, 
       show: isAdmin || isRegDesk 

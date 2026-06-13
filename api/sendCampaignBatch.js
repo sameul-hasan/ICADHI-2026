@@ -82,9 +82,14 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "Access Denied: Permissions required" });
     }
 
-    const { campaignId, participantIds } = req.body;
+    const { campaignId, recipientType = "participants", participantIds } = req.body;
     if (!campaignId || !Array.isArray(participantIds) || participantIds.length === 0) {
       return res.status(400).json({ error: "Missing campaignId or participantIds" });
+    }
+
+    const validRecipientTypes = ["participants", "volunteers", "ambassadors"];
+    if (!validRecipientTypes.includes(recipientType)) {
+      return res.status(400).json({ error: "Invalid recipient type" });
     }
 
     // Load SMTP Settings
@@ -127,9 +132,9 @@ export default async function handler(req, res) {
 
     for (const participantId of participantIds) {
       try {
-        const partDoc = await db.collection("participants").doc(participantId).get();
+        const partDoc = await db.collection(recipientType).doc(participantId).get();
         if (!partDoc.exists) {
-          batchResults[participantId] = { status: "failed", error: "Participant not found." };
+          batchResults[participantId] = { status: "failed", error: "Recipient not found." };
           failureCount++;
           continue;
         }
@@ -138,11 +143,12 @@ export default async function handler(req, res) {
         // Dynamically replace template placeholders
         let htmlContent = template.htmlContent || "";
         htmlContent = htmlContent.replace(/\{\{fullName\}\}/g, p.fullName || "");
-        htmlContent = htmlContent.replace(/\{\{teamName\}\}/g, p.teamName || "N/A");
+        htmlContent = htmlContent.replace(/\{\{teamName\}\}/g, p.teamName || p.designation || "N/A");
         htmlContent = htmlContent.replace(/\{\{email\}\}/g, p.email || "");
-        htmlContent = htmlContent.replace(/\{\{institution\}\}/g, p.institution || "");
-        htmlContent = htmlContent.replace(/\{\{registrationType\}\}/g, p.registrationType || "");
-        const qrCodeImgUrl = p.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId, secureToken: p.uniqueToken || `ICADHI-2026-LOCAL-${participantId}` }))}`;
+        htmlContent = htmlContent.replace(/\{\{institution\}\}/g, p.institution || p.deptUniversity || "");
+        htmlContent = htmlContent.replace(/\{\{registrationType\}\}/g, p.registrationType || recipientType);
+        const uniqueId = p.uniqueToken || p.volunteerId || p.ambassadorId || `ICADHI-2026-LOCAL-${participantId}`;
+        const qrCodeImgUrl = p.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId, secureToken: uniqueId }))}`;
         htmlContent = htmlContent.replace(/\{\{qrCode\}\}/g, `<img src="${qrCodeImgUrl}" width="150" alt="Registration QR Code" style="display:block; margin: 15px auto;" />`);
         htmlContent = htmlContent.replace(/\{\{eventName\}\}/g, "ICADHI 2026");
 
@@ -154,7 +160,7 @@ export default async function handler(req, res) {
         });
 
         // Update participant document
-        await db.collection("participants").doc(participantId).update({
+        await db.collection(recipientType).doc(participantId).update({
           emailSent: true,
           emailSentAt: FieldValue.serverTimestamp()
         });
