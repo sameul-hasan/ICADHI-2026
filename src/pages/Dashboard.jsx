@@ -33,6 +33,8 @@ import {
 
 export const Dashboard = () => {
   const [participants, setParticipants] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [ambassadors, setAmbassadors] = useState([]);
   const [recentLogs, setRecentLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +53,30 @@ export const Dashboard = () => {
       setLoading(false);
     });
 
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, "volunteers"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      setVolunteers(list);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, "ambassadors"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = [];
+      snapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+      setAmbassadors(list);
+    });
     return unsubscribe;
   }, []);
 
@@ -254,6 +280,34 @@ export const Dashboard = () => {
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-1">
                 {totalParticipants ? Math.round((lunchCollected / totalParticipants) * 100) : 0}% of total
               </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Team Overview Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4">
+        <Card variant="glass" className="hover:-translate-y-1">
+          <CardContent className="p-4 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Organizers</span>
+              <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300"><Users className="h-4.5 w-4.5" /></div>
+            </div>
+            <div className="mt-4">
+              <span className="text-2xl font-black text-slate-800 dark:text-white leading-none">{volunteers.length}</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-1">Organizing Committee</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card variant="glass" className="hover:-translate-y-1">
+          <CardContent className="p-4 flex flex-col justify-between h-full">
+            <div className="flex justify-between items-start">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Ambassadors</span>
+              <div className="p-1.5 rounded-lg bg-pink-100 dark:bg-pink-950 text-pink-800 dark:text-pink-300"><Users className="h-4.5 w-4.5" /></div>
+            </div>
+            <div className="mt-4">
+              <span className="text-2xl font-black text-slate-800 dark:text-white leading-none">{ambassadors.length}</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold block mt-1">Campus Ambassadors</span>
             </div>
           </CardContent>
         </Card>

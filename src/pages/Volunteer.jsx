@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { InstructionBanner } from "../components/ui/InstructionBanner";
+import { Dialog } from "../components/ui/Dialog";
 import { Upload, FileSpreadsheet, Info } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -18,6 +19,7 @@ export const Volunteer = () => {
   const [loading, setLoading] = useState(true);
   const [dragActive, setDragActive] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [selectedVol, setSelectedVol] = useState(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "volunteers"), (snap) => {
@@ -202,7 +204,7 @@ export const Volunteer = () => {
             </TableHeader>
             <TableBody>
               {volunteers.map(v => (
-                <TableRow key={v.id}>
+                <TableRow key={v.id} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onClick={() => setSelectedVol(v)}>
                   <TableCell className="font-mono text-xs font-bold text-slate-500">{v.volunteerId}</TableCell>
                   <TableCell className="font-bold">{v.fullName}</TableCell>
                   <TableCell>{v.email}</TableCell>
@@ -221,6 +223,28 @@ export const Volunteer = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedVol} onOpenChange={(open) => !open && setSelectedVol(null)} title="Organizer QR Code">
+        {selectedVol && (
+          <div className="flex flex-col items-center justify-center p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white">{selectedVol.fullName}</h3>
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              {selectedVol.designation} {selectedVol.deptUniversity ? ` - ${selectedVol.deptUniversity}` : ''}
+            </p>
+            {(() => {
+              const qrUrl = selectedVol.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedVol.id, secureToken: selectedVol.volunteerId }))}`;
+              return (
+                <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center mt-4">
+                  <img src={qrUrl} alt="QR Code" className="h-44 w-44 object-contain" />
+                  <a href={qrUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-600 font-bold mt-3 underline">
+                    Download / Open Full Size
+                  </a>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card"
 import { Button } from "../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { InstructionBanner } from "../components/ui/InstructionBanner";
+import { Dialog } from "../components/ui/Dialog";
 import { Upload, FileSpreadsheet, Info } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -18,6 +19,7 @@ export const Ambassador = () => {
   const [loading, setLoading] = useState(true);
   const [dragActive, setDragActive] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [selectedAmb, setSelectedAmb] = useState(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "ambassadors"), (snap) => {
@@ -200,7 +202,7 @@ export const Ambassador = () => {
             </TableHeader>
             <TableBody>
               {ambassadors.map(a => (
-                <TableRow key={a.id}>
+                <TableRow key={a.id} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onClick={() => setSelectedAmb(a)}>
                   <TableCell className="font-mono text-xs font-bold text-slate-500">{a.ambassadorId}</TableCell>
                   <TableCell className="font-bold">{a.fullName}</TableCell>
                   <TableCell>{a.universityName || "N/A"}</TableCell>
@@ -218,6 +220,28 @@ export const Ambassador = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedAmb} onOpenChange={(open) => !open && setSelectedAmb(null)} title="Ambassador QR Code">
+        {selectedAmb && (
+          <div className="flex flex-col items-center justify-center p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white">{selectedAmb.fullName}</h3>
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              {selectedAmb.universityName || selectedAmb.universityEmail}
+            </p>
+            {(() => {
+              const qrUrl = selectedAmb.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedAmb.id, secureToken: selectedAmb.ambassadorId }))}`;
+              return (
+                <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center mt-4">
+                  <img src={qrUrl} alt="QR Code" className="h-44 w-44 object-contain" />
+                  <a href={qrUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-600 font-bold mt-3 underline">
+                    Download / Open Full Size
+                  </a>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };

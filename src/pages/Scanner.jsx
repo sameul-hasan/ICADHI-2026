@@ -168,38 +168,50 @@ export const Scanner = () => {
   const processParticipantCheckIn = async (participantId, token = "") => {
     setUpdatingField(true);
     try {
-      let docRef = doc(db, "participants", participantId);
-      let snap = await getDoc(docRef);
       let pData = null;
       let actualDocId = participantId;
+      let activeCollection = "participants";
+      let docRef = null;
 
-      if (snap.exists()) {
-        pData = snap.data();
-      } else {
-        // Fallback: search for a participant document with participantId field matching the scanned participantId
-        const q = query(collection(db, "participants"), where("participantId", "==", participantId));
+      const collectionsToSearch = ["participants", "volunteers", "ambassadors"];
+      
+      for (const coll of collectionsToSearch) {
+        const tempRef = doc(db, coll, participantId);
+        const snap = await getDoc(tempRef);
+        if (snap.exists()) {
+          pData = snap.data();
+          docRef = tempRef;
+          activeCollection = coll;
+          break;
+        }
+        
+        const fieldName = coll === "participants" ? "participantId" : coll === "volunteers" ? "volunteerId" : "ambassadorId";
+        const q = query(collection(db, coll), where(fieldName, "==", participantId));
         const qSnap = await getDocs(q);
         if (!qSnap.empty) {
           const matchedDoc = qSnap.docs[0];
           docRef = matchedDoc.ref;
           pData = matchedDoc.data();
           actualDocId = matchedDoc.id;
+          activeCollection = coll;
+          break;
         }
       }
 
       if (!pData) {
         setResultStatus("invalid");
         setScannedParticipant(null);
-        showToast("Participant record not found in system.", "error");
+        showToast("Record not found in system.", "error");
         setUpdatingField(false);
         return;
       }
 
-      const p = { id: actualDocId, ...pData };
+      const p = { id: actualDocId, activeCollection, docRefPath: docRef.path, ...pData };
       setScannedParticipant(p);
 
       // Verify secure token if present
-      if (token && p.uniqueToken && p.uniqueToken !== token) {
+      const expectedToken = p.uniqueToken || p.volunteerId || p.ambassadorId;
+      if (token && expectedToken && expectedToken !== token) {
         setResultStatus("invalid");
         showToast("Security Token Mismatch! Possible QR tampering.", "error");
         setUpdatingField(false);
@@ -320,7 +332,7 @@ export const Scanner = () => {
     if (!scannedParticipant) return;
     setUpdatingField(true);
     try {
-      const docRef = doc(db, "participants", scannedParticipant.id);
+      const docRef = doc(db, scannedParticipant.activeCollection, scannedParticipant.id);
       const updateData = {
         kitCollected: true,
         kitCollectedAt: serverTimestamp(),
@@ -548,7 +560,10 @@ export const Scanner = () => {
                         <User className="h-8 w-8" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Team ID: {scannedParticipant.participantId}</span>
+                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
+                          {scannedParticipant.activeCollection === "participants" ? "Team ID: " : scannedParticipant.activeCollection === "volunteers" ? "Organizer ID: " : "Ambassador ID: "} 
+                          {scannedParticipant.participantId || scannedParticipant.volunteerId || scannedParticipant.ambassadorId}
+                        </span>
                         {scannedParticipant.teamName ? (
                           <>
                             <h3 className="text-xl font-black text-primary-850 dark:text-primary-400 truncate">{scannedParticipant.teamName}</h3>
@@ -557,12 +572,19 @@ export const Scanner = () => {
                         ) : (
                           <h3 className="text-xl font-bold text-slate-850 dark:text-white truncate">{scannedParticipant.fullName}</h3>
                         )}
-                        <p className="text-xs font-semibold text-slate-400 truncate mt-0.5">{scannedParticipant.institution}</p>
-                        {scannedParticipant.ambassadorId && (
+                        <p className="text-xs font-semibold text-slate-400 truncate mt-0.5">
+                          {scannedParticipant.institution || scannedParticipant.deptUniversity || scannedParticipant.universityName || scannedParticipant.designation}
+                        </p>
+                        {scannedParticipant.ambassadorId && scannedParticipant.activeCollection === "participants" && (
                           <p className="text-[11px] font-bold text-amber-600 mt-1">
                             Ambassador: {scannedParticipant.ambassadorId}
                           </p>
                         )}
+                        <div className="mt-2">
+                           <Badge variant={scannedParticipant.activeCollection === "participants" ? "primary" : scannedParticipant.activeCollection === "volunteers" ? "purple" : "pink"} className="uppercase tracking-wider">
+                             {scannedParticipant.activeCollection === "participants" ? "Participant" : scannedParticipant.activeCollection === "volunteers" ? "Organizer" : "Ambassador"}
+                           </Badge>
+                        </div>
                       </div>
                     </div>
  
