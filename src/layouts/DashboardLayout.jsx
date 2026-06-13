@@ -68,13 +68,13 @@ export const DashboardLayout = ({ children }) => {
       name: "Organizers", 
       path: "/volunteers", 
       icon: <HeartHandshake className="h-5 w-5" />, 
-      show: isAdmin || isRegDesk 
+      show: true 
     },
     { 
       name: "Ambassadors", 
       path: "/ambassadors", 
       icon: <Award className="h-5 w-5" />, 
-      show: isAdmin || isRegDesk 
+      show: true 
     },
     { 
       name: "Excel Upload", 
