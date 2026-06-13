@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { db } from "../services/firebase";
-import { collection, onSnapshot, writeBatch, doc, serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, writeBatch, doc, serverTimestamp, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "../components/ui/Table";
 import { InstructionBanner } from "../components/ui/InstructionBanner";
+import { Input } from "../components/ui/Input";
+import { Badge } from "../components/ui/Badge";
 import { Dialog } from "../components/ui/Dialog";
-import { Upload, FileSpreadsheet, Info } from "lucide-react";
+import { Upload, FileSpreadsheet, Info, Plus, Eye, Edit, Trash2, UserCheck } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export const Volunteer = () => {
@@ -20,6 +22,14 @@ export const Volunteer = () => {
   const [dragActive, setDragActive] = useState(false);
   const [importing, setImporting] = useState(false);
   const [selectedVol, setSelectedVol] = useState(null);
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    id: "", fullName: "", email: "", phone: "", designation: "", tShirtSize: "", deptUniversity: ""
+  });
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "volunteers"), (snap) => {
@@ -30,6 +40,77 @@ export const Volunteer = () => {
     });
     return unsub;
   }, []);
+
+  const openFormModal = (vol = null) => {
+    if (vol) {
+      setFormData({
+        id: vol.id,
+        fullName: vol.fullName || "",
+        email: vol.email || "",
+        phone: vol.phone || "",
+        designation: vol.designation || "",
+        tShirtSize: vol.tShirtSize || "",
+        deptUniversity: vol.deptUniversity || ""
+      });
+    } else {
+      setFormData({ id: "", fullName: "", email: "", phone: "", designation: "", tShirtSize: "", deptUniversity: "" });
+    }
+    setIsFormOpen(true);
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.fullName || !formData.email) {
+      showToast("Name and Email are required", "warning");
+      return;
+    }
+    setLoading(true);
+    try {
+      if (formData.id) {
+        await updateDoc(doc(db, "volunteers", formData.id), {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          designation: formData.designation,
+          tShirtSize: formData.tShirtSize,
+          deptUniversity: formData.deptUniversity
+        });
+        showToast("Organizer updated", "success");
+      } else {
+        const vId = `VOL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        await setDoc(doc(db, "volunteers", vId), {
+          volunteerId: vId,
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          designation: formData.designation,
+          tShirtSize: formData.tShirtSize,
+          deptUniversity: formData.deptUniversity,
+          createdAt: serverTimestamp()
+        });
+        showToast("Organizer created", "success");
+      }
+      setIsFormOpen(false);
+    } catch (err) {
+      console.error(err);
+      showToast("Operation failed", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedVol) return;
+    try {
+      await deleteDoc(doc(db, "volunteers", selectedVol.id));
+      showToast("Organizer deleted", "success");
+      setIsDeleteOpen(false);
+      setSelectedVol(null);
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to delete", "error");
+    }
+  };
 
   const processExcelData = async (data) => {
     const rawRows = XLSX.utils.sheet_to_json(data, { header: 1 });
@@ -153,11 +234,16 @@ export const Volunteer = () => {
         </ul>
       </InstructionBanner>
 
-      <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-slate-900 px-6 py-4 rounded-xl border border-slate-200 dark:border-slate-800 gap-4">
         <div>
           <h1 className="text-xl font-bold">Organizers Database</h1>
           <p className="text-xs text-slate-500 mt-0.5">Manage and import organizer data</p>
         </div>
+        {isAdmin && (
+          <Button variant="primary" onClick={() => openFormModal()} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Add Organizer
+          </Button>
+        )}
       </div>
 
       {isAdmin && (
@@ -200,11 +286,13 @@ export const Volunteer = () => {
                 <TableHead>Designation</TableHead>
                 <TableHead>Dept/Univ</TableHead>
                 <TableHead>T-Shirt</TableHead>
+                <TableHead>Check-in</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {volunteers.map(v => (
-                <TableRow key={v.id} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50" onClick={() => setSelectedVol(v)}>
+                <TableRow key={v.id}>
                   <TableCell className="font-mono text-xs font-bold text-slate-500">{v.volunteerId}</TableCell>
                   <TableCell className="font-bold">{v.fullName}</TableCell>
                   <TableCell>{v.email}</TableCell>
@@ -212,6 +300,28 @@ export const Volunteer = () => {
                   <TableCell>{v.designation || "N/A"}</TableCell>
                   <TableCell>{v.deptUniversity || "N/A"}</TableCell>
                   <TableCell>{v.tShirtSize || "N/A"}</TableCell>
+                  <TableCell>
+                    <Badge variant={v.registrationScanned ? "success" : "neutral"} className="flex gap-1 items-center w-fit">
+                      <UserCheck className="h-3 w-3" /> {v.registrationScanned ? "In" : "Pending"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1.5">
+                      <Button variant="ghost" size="sm" className="p-1.5" onClick={() => { setSelectedVol(v); setIsDetailsOpen(true); }}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {isAdmin && (
+                        <>
+                          <Button variant="ghost" size="sm" className="p-1.5 text-blue-600 hover:text-blue-800" onClick={() => openFormModal(v)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="p-1.5 text-red-600 hover:text-red-800" onClick={() => { setSelectedVol(v); setIsDeleteOpen(true); }}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {volunteers.length === 0 && !loading && (
@@ -224,26 +334,95 @@ export const Volunteer = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={!!selectedVol} onOpenChange={(open) => !open && setSelectedVol(null)} title="Organizer QR Code">
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen} title="Organizer Details" size="3xl">
         {selectedVol && (
-          <div className="flex flex-col items-center justify-center p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white">{selectedVol.fullName}</h3>
-            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-              {selectedVol.designation} {selectedVol.deptUniversity ? ` - ${selectedVol.deptUniversity}` : ''}
-            </p>
-            {(() => {
-              const qrUrl = selectedVol.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedVol.id, secureToken: selectedVol.volunteerId }))}`;
-              return (
-                <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center mt-4">
-                  <img src={qrUrl} alt="QR Code" className="h-44 w-44 object-contain" />
-                  <a href={qrUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-600 font-bold mt-3 underline">
-                    Download / Open Full Size
-                  </a>
-                </div>
-              );
-            })()}
+          <div className="flex flex-col md:flex-row gap-8 p-6">
+            <div className="flex-1 space-y-6">
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white">{selectedVol.fullName}</h3>
+                <p className="text-sm font-semibold text-primary-600 dark:text-primary-400 mt-1">{selectedVol.volunteerId}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><span className="text-xs text-slate-500 font-bold block mb-1">Email</span><span className="text-sm font-medium break-all">{selectedVol.email}</span></div>
+                <div><span className="text-xs text-slate-500 font-bold block mb-1">Phone</span><span className="text-sm font-medium">{selectedVol.phone || "N/A"}</span></div>
+                <div><span className="text-xs text-slate-500 font-bold block mb-1">Designation</span><span className="text-sm font-medium">{selectedVol.designation || "N/A"}</span></div>
+                <div><span className="text-xs text-slate-500 font-bold block mb-1">Dept/Univ</span><span className="text-sm font-medium">{selectedVol.deptUniversity || "N/A"}</span></div>
+                <div><span className="text-xs text-slate-500 font-bold block mb-1">T-Shirt Size</span><span className="text-sm font-medium">{selectedVol.tShirtSize || "N/A"}</span></div>
+              </div>
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex gap-2">
+                <Badge variant={selectedVol.registrationScanned ? "success" : "neutral"}>
+                  Reg: {selectedVol.registrationScanned ? "Scanned" : "Pending"}
+                </Badge>
+                <Badge variant={selectedVol.kitCollected ? "success" : "neutral"}>
+                  Kit: {selectedVol.kitCollected ? "Collected" : "Pending"}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center border-l border-slate-100 dark:border-slate-800 pl-6">
+              <span className="text-xs font-bold text-slate-500 uppercase mb-4">Organizer QR Code</span>
+              {(() => {
+                const qrUrl = selectedVol.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedVol.id, secureToken: selectedVol.volunteerId }))}`;
+                return (
+                  <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center">
+                    <img src={qrUrl} alt="QR Code" className="h-44 w-44 object-contain" />
+                    <a href={qrUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-600 font-bold mt-3 underline">
+                      Download Full Size
+                    </a>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         )}
+      </Dialog>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen} title={formData.id ? "Edit Organizer" : "Add Organizer"} size="xl">
+        <form onSubmit={handleFormSubmit} className="p-6 flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Full Name *</label>
+              <Input required value={formData.fullName} onChange={e => setFormData({ ...formData, fullName: e.target.value })} placeholder="John Doe" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Email *</label>
+              <Input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="john@example.com" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Phone</label>
+              <Input value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+880..." />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Designation</label>
+              <Input value={formData.designation} onChange={e => setFormData({ ...formData, designation: e.target.value })} placeholder="Logistics Head" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Dept/University</label>
+              <Input value={formData.deptUniversity} onChange={e => setFormData({ ...formData, deptUniversity: e.target.value })} placeholder="CSE, BUET" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">T-Shirt Size</label>
+              <Input value={formData.tShirtSize} onChange={e => setFormData({ ...formData, tShirtSize: e.target.value })} placeholder="L" />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="ghost" type="button" onClick={() => setIsFormOpen(false)}>Cancel</Button>
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? "Saving..." : formData.id ? "Save Changes" : "Create Organizer"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen} title="Delete Organizer" size="sm">
+        <div className="p-6">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Are you sure you want to delete <strong>{selectedVol?.fullName}</strong>? This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          </div>
+        </div>
       </Dialog>
     </div>
   );
