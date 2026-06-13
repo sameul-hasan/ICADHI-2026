@@ -46,7 +46,10 @@ export const Volunteer = () => {
     const hMap = {
       name: findHeaderIndex(["name", "full name"]),
       email: findHeaderIndex(["email", "email address"]),
-      phone: findHeaderIndex(["phone", "contact"])
+      phone: findHeaderIndex(["phone", "contact"]),
+      designation: findHeaderIndex(["designation"]),
+      tShirtSize: findHeaderIndex(["t-shirt size", "tshirt size", "size"]),
+      deptUniversity: findHeaderIndex(["dept, university", "department", "university"])
     };
 
     if (hMap.name === -1 || hMap.email === -1) {
@@ -61,7 +64,10 @@ export const Volunteer = () => {
       validRows.push({
         fullName: String(row[hMap.name]).trim(),
         email: String(row[hMap.email]).trim().toLowerCase(),
-        phone: hMap.phone !== -1 && row[hMap.phone] ? String(row[hMap.phone]).trim() : ""
+        phone: hMap.phone !== -1 && row[hMap.phone] ? String(row[hMap.phone]).trim() : "",
+        designation: hMap.designation !== -1 && row[hMap.designation] ? String(row[hMap.designation]).trim() : "",
+        tShirtSize: hMap.tShirtSize !== -1 && row[hMap.tShirtSize] ? String(row[hMap.tShirtSize]).trim() : "",
+        deptUniversity: hMap.deptUniversity !== -1 && row[hMap.deptUniversity] ? String(row[hMap.deptUniversity]).trim() : ""
       });
     }
 
@@ -85,6 +91,9 @@ export const Volunteer = () => {
             fullName: row.fullName,
             email: row.email,
             phone: row.phone,
+            designation: row.designation,
+            tShirtSize: row.tShirtSize,
+            deptUniversity: row.deptUniversity,
             createdAt: serverTimestamp()
           });
         });
@@ -159,7 +168,7 @@ export const Volunteer = () => {
                 {importing ? "Importing Data..." : "Drag and Drop Excel File here"}
               </h3>
               <p className="text-xs text-slate-450 dark:text-slate-500 mt-1.5">
-                Supported columns: Name, Email, Phone
+                Supported columns: Full Name, Email, Contact, Designation, T-shirt Size, Dept, University
               </p>
             </form>
           </CardContent>
@@ -178,6 +187,9 @@ export const Volunteer = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Designation</TableHead>
+                <TableHead>Dept/Univ</TableHead>
+                <TableHead>T-Shirt</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,11 +199,14 @@ export const Volunteer = () => {
                   <TableCell className="font-bold">{v.fullName}</TableCell>
                   <TableCell>{v.email}</TableCell>
                   <TableCell>{v.phone || "N/A"}</TableCell>
+                  <TableCell>{v.designation || "N/A"}</TableCell>
+                  <TableCell>{v.deptUniversity || "N/A"}</TableCell>
+                  <TableCell>{v.tShirtSize || "N/A"}</TableCell>
                 </TableRow>
               ))}
               {volunteers.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-slate-500">No volunteers found</TableCell>
+                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">No volunteers found</TableCell>
                 </TableRow>
               )}
             </TableBody>
