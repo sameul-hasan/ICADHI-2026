@@ -45,30 +45,28 @@ export const Ambassador = () => {
     };
     
     const hMap = {
-      name: findHeaderIndex(["name", "full name"]),
-      email: findHeaderIndex(["email", "email address"]),
-      phone: findHeaderIndex(["phone", "contact"]),
-      designation: findHeaderIndex(["designation"]),
-      tShirtSize: findHeaderIndex(["t-shirt size", "tshirt size", "size"]),
-      deptUniversity: findHeaderIndex(["dept, university", "department", "university"])
+      fullName: findHeaderIndex(["full name", "name"]),
+      universityName: findHeaderIndex(["university name", "university"]),
+      universityEmail: findHeaderIndex(["university email"]),
+      personalEmail: findHeaderIndex(["personal email", "email"]),
+      mobileNumber: findHeaderIndex(["mobile number", "mobile", "phone", "contact"])
     };
 
-    if (hMap.name === -1 || hMap.email === -1) {
-      showToast("Missing required columns: Name and Email", "error");
+    if (hMap.fullName === -1 || (hMap.universityEmail === -1 && hMap.personalEmail === -1)) {
+      showToast("Missing required columns: Full Name and at least one Email", "error");
       return;
     }
 
     const validRows = [];
     for (let i = 1; i < rawRows.length; i++) {
       const row = rawRows[i];
-      if (!row || row.length === 0 || !row[hMap.name] || !row[hMap.email]) continue;
+      if (!row || row.length === 0 || !row[hMap.fullName] || (!row[hMap.universityEmail] && !row[hMap.personalEmail])) continue;
       validRows.push({
-        fullName: String(row[hMap.name]).trim(),
-        email: String(row[hMap.email]).trim().toLowerCase(),
-        phone: hMap.phone !== -1 && row[hMap.phone] ? String(row[hMap.phone]).trim() : "",
-        designation: hMap.designation !== -1 && row[hMap.designation] ? String(row[hMap.designation]).trim() : "",
-        tShirtSize: hMap.tShirtSize !== -1 && row[hMap.tShirtSize] ? String(row[hMap.tShirtSize]).trim() : "",
-        deptUniversity: hMap.deptUniversity !== -1 && row[hMap.deptUniversity] ? String(row[hMap.deptUniversity]).trim() : ""
+        fullName: String(row[hMap.fullName]).trim(),
+        universityName: hMap.universityName !== -1 && row[hMap.universityName] ? String(row[hMap.universityName]).trim() : "",
+        universityEmail: hMap.universityEmail !== -1 && row[hMap.universityEmail] ? String(row[hMap.universityEmail]).trim().toLowerCase() : "",
+        personalEmail: hMap.personalEmail !== -1 && row[hMap.personalEmail] ? String(row[hMap.personalEmail]).trim().toLowerCase() : "",
+        mobileNumber: hMap.mobileNumber !== -1 && row[hMap.mobileNumber] ? String(row[hMap.mobileNumber]).trim() : "",
       });
     }
 
@@ -90,11 +88,12 @@ export const Ambassador = () => {
           batch.set(ref, {
             ambassadorId: aId,
             fullName: row.fullName,
-            email: row.email,
-            phone: row.phone,
-            designation: row.designation,
-            tShirtSize: row.tShirtSize,
-            deptUniversity: row.deptUniversity,
+            universityName: row.universityName,
+            universityEmail: row.universityEmail,
+            personalEmail: row.personalEmail,
+            email: row.personalEmail || row.universityEmail,
+            phone: row.mobileNumber,
+            mobileNumber: row.mobileNumber,
             createdAt: serverTimestamp()
           });
         });
@@ -146,7 +145,7 @@ export const Ambassador = () => {
     <div className="flex flex-col gap-6">
       <InstructionBanner title="Ambassador Management" icon={Info} color="purple">
         <ul className="list-disc pl-4 space-y-1">
-          <li><strong>Supported Columns:</strong> Upload an Excel file with columns for Full Name, Email, Contact, Designation, T-shirt Size, and Dept/University.</li>
+          <li><strong>Supported Columns:</strong> Upload an Excel file with columns for Full Name, University Name, University Email, Personal Email, and Mobile Number.</li>
           <li><strong>Usage:</strong> Ambassadors added here can be selected as the target audience in the Email Campaigns engine to send out mass updates.</li>
         </ul>
       </InstructionBanner>
@@ -176,7 +175,7 @@ export const Ambassador = () => {
                 {importing ? "Importing Data..." : "Drag and Drop Excel File here"}
               </h3>
               <p className="text-xs text-slate-450 dark:text-slate-500 mt-1.5">
-                Supported columns: Full Name, Email, Contact, Designation, T-shirt Size, Dept, University
+                Supported columns: Full Name, University Name, University Email, Personal Email, Mobile Number
               </p>
             </form>
           </CardContent>
@@ -192,12 +191,11 @@ export const Ambassador = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Ambassador ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Designation</TableHead>
-                <TableHead>Dept/Univ</TableHead>
-                <TableHead>T-Shirt</TableHead>
+                <TableHead>Full Name</TableHead>
+                <TableHead>University Name</TableHead>
+                <TableHead>University Email</TableHead>
+                <TableHead>Personal Email</TableHead>
+                <TableHead>Mobile Number</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -205,11 +203,10 @@ export const Ambassador = () => {
                 <TableRow key={a.id}>
                   <TableCell className="font-mono text-xs font-bold text-slate-500">{a.ambassadorId}</TableCell>
                   <TableCell className="font-bold">{a.fullName}</TableCell>
-                  <TableCell>{a.email}</TableCell>
-                  <TableCell>{a.phone || "N/A"}</TableCell>
-                  <TableCell>{a.designation || "N/A"}</TableCell>
-                  <TableCell>{a.deptUniversity || "N/A"}</TableCell>
-                  <TableCell>{a.tShirtSize || "N/A"}</TableCell>
+                  <TableCell>{a.universityName || "N/A"}</TableCell>
+                  <TableCell>{a.universityEmail || "N/A"}</TableCell>
+                  <TableCell>{a.personalEmail || "N/A"}</TableCell>
+                  <TableCell>{a.mobileNumber || "N/A"}</TableCell>
                 </TableRow>
               ))}
               {ambassadors.length === 0 && !loading && (

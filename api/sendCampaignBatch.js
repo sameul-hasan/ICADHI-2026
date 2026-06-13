@@ -152,12 +152,23 @@ export default async function handler(req, res) {
         htmlContent = htmlContent.replace(/\{\{qrCode\}\}/g, `<img src="${qrCodeImgUrl}" width="150" alt="Registration QR Code" style="display:block; margin: 15px auto;" />`);
         htmlContent = htmlContent.replace(/\{\{eventName\}\}/g, "ICADHI 2026");
 
-        await transporter.sendMail({
+        const mailOptions = {
           from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
           to: p.email,
           subject: template.subject || "Your ICADHI 2026 Registration QR Code",
           html: htmlContent
-        });
+        };
+
+        if (campaign.attachmentUrl && campaign.attachmentName) {
+          mailOptions.attachments = [
+            {
+              filename: campaign.attachmentName,
+              path: campaign.attachmentUrl
+            }
+          ];
+        }
+
+        await transporter.sendMail(mailOptions);
 
         // Update participant document
         await db.collection(recipientType).doc(participantId).update({

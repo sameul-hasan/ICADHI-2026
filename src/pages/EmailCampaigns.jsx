@@ -39,6 +39,7 @@ export const EmailCampaigns = () => {
   const [audience, setAudience] = useState("participants"); // participants | volunteers | ambassadors
   const [targetType, setTargetType] = useState("all"); // all | failed | selected
   const [selectedAttendeeIds, setSelectedAttendeeIds] = useState([]);
+  const [attachmentFile, setAttachmentFile] = useState(null);
   
   // Active Campaign Progression states
   const [activeCampaign, setActiveCampaign] = useState(null);
@@ -133,6 +134,27 @@ export const EmailCampaigns = () => {
     setIsSendingOpen(true);
     setCampaignLogs(["Initializing bulk campaign..."]);
     
+    let attachmentUrl = null;
+    let attachmentName = null;
+
+    if (attachmentFile) {
+      setCampaignLogs(prev => [...prev, `Uploading attachment: ${attachmentFile.name}...`]);
+      try {
+        const { getStorage, ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+        const storage = getStorage();
+        const fileRef = ref(storage, `campaign_attachments/${Date.now()}_${attachmentFile.name}`);
+        await uploadBytes(fileRef, attachmentFile);
+        attachmentUrl = await getDownloadURL(fileRef);
+        attachmentName = attachmentFile.name;
+        setCampaignLogs(prev => [...prev, `Attachment uploaded successfully.`]);
+      } catch (err) {
+        setCampaignLogs(prev => [...prev, `Error uploading attachment: ${err.message}`]);
+        showToast(`Failed to upload attachment`, "error");
+        setIsSendingOpen(false);
+        return;
+      }
+    }
+    
     const recipientIds = recipients.map(r => r.id);
     const totalCount = recipientIds.length;
     const batchSize = 100;
@@ -156,6 +178,8 @@ export const EmailCampaigns = () => {
         sentCount: 0,
         failedCount: 0,
         results: {},
+        attachmentUrl,
+        attachmentName,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -310,7 +334,7 @@ export const EmailCampaigns = () => {
           <h1 className="text-xl font-bold">Email Campaigns Engine</h1>
           <p className="text-xs text-slate-500 mt-0.5 font-medium">Broadcast QR Codes and event invites in safe chunked batches</p>
         </div>
-        <Button onClick={() => { setIsWizardOpen(true); setSelectedAttendeeIds([]); }} className="flex items-center gap-1.5 text-xs font-bold">
+        <Button onClick={() => { setIsWizardOpen(true); setSelectedAttendeeIds([]); setAttachmentFile(null); }} className="flex items-center gap-1.5 text-xs font-bold">
           <Send className="h-4.5 w-4.5" /> Start New Broadcast
         </Button>
       </div>
@@ -440,6 +464,18 @@ export const EmailCampaigns = () => {
               { value: "selected", label: "Send to Custom Selected Attendees" }
             ]}
           />
+
+          {/* Optional Attachment */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              4. Optional Attachment (PDF, Image, etc.)
+            </label>
+            <input 
+              type="file" 
+              onChange={(e) => setAttachmentFile(e.target.files[0] || null)}
+              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-slate-800 dark:file:text-primary-400"
+            />
+          </div>
 
           {/* Target List Checklist */}
           {targetType === "selected" && (
