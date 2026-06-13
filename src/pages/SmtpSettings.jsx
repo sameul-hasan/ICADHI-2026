@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../services/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { getFunctions, httpsCallable } from "firebase/functions";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
@@ -69,13 +68,18 @@ export const SmtpSettings = () => {
 
     setSaving(true);
     try {
-      const functions = getFunctions();
-      const saveSmtpSettings = httpsCallable(functions, 'saveSmtpSettings');
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/saveSmtpSettings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify(settings)
+      });
       
-      const response = await saveSmtpSettings(settings);
-      const result = response.data;
-      
-      if (!result.success) {
+      const result = await response.json();
+      if (!response.ok) {
         throw new Error(result.error || "Failed to save SMTP settings");
       }
       
@@ -94,11 +98,19 @@ export const SmtpSettings = () => {
     setTesting(true);
     setTestResult(null);
     try {
-      const functions = getFunctions();
-      const testSmtpConnection = httpsCallable(functions, 'testSmtpConnection');
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/testSmtpConnection", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        }
+      });
       
-      const response = await testSmtpConnection({});
-      const result = response.data;
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to execute SMTP test");
+      }
       
       if (result.success) {
         setTestResult({ status: "success", message: result.message });
@@ -125,13 +137,18 @@ export const SmtpSettings = () => {
     setSendingEmail(true);
     setSendEmailResult(null);
     try {
-      const functions = getFunctions();
-      const sendTestEmail = httpsCallable(functions, 'sendTestEmail');
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/sendTestEmail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ targetEmail: testEmailAddress })
+      });
       
-      const response = await sendTestEmail({ targetEmail: testEmailAddress });
-      const result = response.data;
-      
-      if (!result.success) {
+      const result = await response.json();
+      if (!response.ok) {
         throw new Error(result.error || "Failed to send test email");
       }
       

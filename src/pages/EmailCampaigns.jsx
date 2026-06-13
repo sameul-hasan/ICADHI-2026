@@ -8,7 +8,6 @@ import {
   updateDoc, 
   serverTimestamp 
 } from "firebase/firestore";
-import { getFunctions, httpsCallable } from "firebase/functions";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/Card";
@@ -198,17 +197,22 @@ export const EmailCampaigns = () => {
         setSendingProgress(prev => ({ ...prev, batchNum }));
         setCampaignLogs(prev => [...prev, `Sending batch ${batchNum} of ${totalBatches} (${chunk.length} emails)...`]);
 
-        const functions = getFunctions();
-        const sendCampaignBatch = httpsCallable(functions, 'sendCampaignBatch');
-        
-        const response = await sendCampaignBatch({
-          campaignId,
-          recipientType: audience,
-          participantIds: chunk
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch("/api/sendCampaignBatch", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            campaignId,
+            recipientType: audience,
+            participantIds: chunk
+          })
         });
 
-        const result = response.data;
-        if (!result.success) {
+        const result = await response.json();
+        if (!response.ok) {
           throw new Error(result.error || "Batch dispatch failed");
         }
 
@@ -281,17 +285,22 @@ export const EmailCampaigns = () => {
         const batchNum = i + 1;
         setSendingProgress(prev => ({ ...prev, batchNum }));
         
-        const functions = getFunctions();
-        const sendCampaignBatch = httpsCallable(functions, 'sendCampaignBatch');
-        
-        const response = await sendCampaignBatch({
-          campaignId: campaign.id,
-          recipientType: campaign.audience || "participants",
-          participantIds: chunk
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch("/api/sendCampaignBatch", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            campaignId: campaign.id,
+            recipientType: campaign.audience || "participants",
+            participantIds: chunk
+          })
         });
 
-        const result = response.data;
-        if (!result.success) {
+        const result = await response.json();
+        if (!response.ok) {
           throw new Error(result.error || "Batch retry dispatch failed");
         }
 
