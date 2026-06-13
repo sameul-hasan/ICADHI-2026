@@ -230,6 +230,7 @@ export const Templates = () => {
     let mock = html;
     mock = mock.replace(/\{\{fullName\}\}/g, "Dr. Alice Vance");
     mock = mock.replace(/\{\{teamName\}\}/g, "Team Alpha");
+    mock = mock.replace(/\{\{designation\}\}/g, "Senior Organizer");
     mock = mock.replace(/\{\{email\}\}/g, "alice.vance@mit.edu");
     mock = mock.replace(/\{\{institution\}\}/g, "Massachusetts Institute of Technology");
     mock = mock.replace(/\{\{registrationType\}\}/g, "Invited Speaker");
@@ -242,7 +243,7 @@ export const Templates = () => {
     <div className="flex flex-col gap-6">
       <InstructionBanner title="Email Templates" icon={Lightbulb} color="blue">
         <ul className="list-disc pl-4 space-y-1">
-          <li><strong>Smart Tags:</strong> Use variables like <code>{`{{fullName}}`}</code>, <code>{`{{email}}`}</code>, and <code>{`{{teamName}}`}</code>. They will be auto-replaced for each recipient!</li>
+          <li><strong>Smart Tags:</strong> Use variables like <code>{`{{fullName}}`}</code>, <code>{`{{email}}`}</code>, <code>{`{{teamName}}`}</code>, and <code>{`{{designation}}`}</code>. They will be auto-replaced for each recipient!</li>
           <li><strong>QR Code:</strong> Include the <code>{`{{qrCode}}`}</code> tag to automatically embed their unique, secure registration QR code in the email.</li>
           <li><strong>HTML Allowed:</strong> You can write full HTML for custom branding, colors, and layouts.</li>
         </ul>

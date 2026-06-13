@@ -143,7 +143,8 @@ export default async function handler(req, res) {
         // Dynamically replace template placeholders
         let htmlContent = template.htmlContent || "";
         htmlContent = htmlContent.replace(/\{\{fullName\}\}/g, p.fullName || "");
-        htmlContent = htmlContent.replace(/\{\{teamName\}\}/g, p.teamName || p.designation || "N/A");
+        htmlContent = htmlContent.replace(/\{\{teamName\}\}/g, p.teamName || "");
+        htmlContent = htmlContent.replace(/\{\{designation\}\}/g, p.designation || "N/A");
         htmlContent = htmlContent.replace(/\{\{email\}\}/g, p.email || "");
         htmlContent = htmlContent.replace(/\{\{institution\}\}/g, p.institution || p.deptUniversity || "");
         htmlContent = htmlContent.replace(/\{\{registrationType\}\}/g, p.registrationType || recipientType);
