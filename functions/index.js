@@ -221,6 +221,62 @@ exports.testSmtpConnection = onCall({ cors: true }, async (request) => {
 });
 
 /**
+ * 3.5 Callable: Send Test Email (Admin/Super Admin only)
+ */
+exports.sendTestEmail = onCall({ cors: true }, async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new HttpsError("unauthenticated", "User must be authenticated.");
+  }
+  
+  await checkUserRole(uid, ["super_admin", "admin"]);
+
+  const { targetEmail, subject, text, html } = request.data;
+  if (!targetEmail) {
+    throw new HttpsError("invalid-argument", "Missing targetEmail.");
+  }
+
+  const doc = await admin.firestore().collection("smtpSettings").doc("default").get();
+  if (!doc.exists) {
+    throw new HttpsError("not-found", "SMTP settings not configured.");
+  }
+
+  const settings = doc.data();
+  const decryptedPassword = decrypt(settings.encryptedPassword);
+  if (!decryptedPassword) {
+    throw new HttpsError("internal", "Failed to decrypt SMTP credentials.");
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: settings.host,
+    port: settings.port,
+    secure: settings.port === 465,
+    auth: {
+      user: settings.username,
+      pass: decryptedPassword
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000
+  });
+
+  const mailOptions = {
+    from: `"${settings.fromName || 'ICADHI 2026'}" <${settings.fromEmail}>`,
+    to: targetEmail,
+    subject: subject || "Test Email from ICADHI 2026 System",
+    text: text || "This is a test email sent from the ICADHI 2026 dashboard.",
+    html: html || `<p>This is a <b>test email</b> sent from the ICADHI 2026 dashboard.</p>`
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, message: `Email sent to ${targetEmail}`, messageId: info.messageId };
+  } catch (error) {
+    console.error("Test email failure:", error);
+    throw new HttpsError("internal", error.message);
+  }
+});
+
+/**
  * 4. Callable: Send Email Campaign Batch (Admin/Super Admin only)
  * Receives campaignId and array of participantIds to process in a batch.
  */
