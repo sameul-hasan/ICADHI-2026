@@ -229,7 +229,7 @@ export const Ambassador = () => {
     <div className="flex flex-col gap-6">
       <InstructionBanner title="Ambassador Management" icon={Info} color="purple">
         <ul className="list-disc pl-4 space-y-1">
-          <li><strong>Supported Columns:</strong> Upload an Excel file with columns for Full Name, University Name, University Email, Personal Email, and Mobile Number.</li>
+          <li><strong>Manual Entry:</strong> Add ambassadors manually using the "Add Ambassador" button.</li>
           <li><strong>Usage:</strong> Ambassadors added here can be selected as the target audience in the Email Campaigns engine to send out mass updates.</li>
         </ul>
       </InstructionBanner>
@@ -246,30 +246,7 @@ export const Ambassador = () => {
         )}
       </div>
 
-      {isAdmin && (
-        <Card>
-          <CardContent className="p-8">
-            <form
-              onDragEnter={handleDrag} onDragOver={handleDrag} onDragLeave={handleDrag} onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                dragActive ? "border-primary-800 bg-primary-50/20" : "border-slate-300 hover:border-slate-400"
-              }`}
-              onClick={() => document.getElementById("amb-file-input").click()}
-            >
-              <input id="amb-file-input" type="file" className="hidden" accept=".xlsx, .xls" onChange={handleFileChange} />
-              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4 shadow-inner">
-                <Upload className="h-5 w-5" />
-              </div>
-              <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200">
-                {importing ? "Importing Data..." : "Drag and Drop Excel File here"}
-              </h3>
-              <p className="text-xs text-slate-450 dark:text-slate-500 mt-1.5">
-                Supported columns: Full Name, University Name, University Email, Personal Email, Mobile Number
-              </p>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+
 
       <Card>
         <CardHeader>
@@ -332,7 +309,7 @@ export const Ambassador = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen} title="Ambassador Details" size="3xl">
+      <Dialog isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} title="Ambassador Details" size="xl">
         {selectedAmb && (
           <div className="flex flex-col md:flex-row gap-8 p-6">
             <div className="flex-1 space-y-6">
@@ -373,7 +350,7 @@ export const Ambassador = () => {
         )}
       </Dialog>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen} title={formData.id ? "Edit Ambassador" : "Add Ambassador"} size="xl">
+      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={formData.id ? "Edit Ambassador" : "Add Ambassador"} size="xl">
         <form onSubmit={handleFormSubmit} className="p-6 flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -406,7 +383,7 @@ export const Ambassador = () => {
         </form>
       </Dialog>
 
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen} title="Delete Ambassador" size="sm">
+      <Dialog isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Ambassador" size="sm">
         <div className="p-6">
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Are you sure you want to delete <strong>{selectedAmb?.fullName}</strong>? This action cannot be undone.

@@ -229,7 +229,7 @@ export const Volunteer = () => {
     <div className="flex flex-col gap-6">
       <InstructionBanner title="Organizers Management" icon={Info} color="purple">
         <ul className="list-disc pl-4 space-y-1">
-          <li><strong>Supported Columns:</strong> Upload an Excel file with columns for Full Name, Email, Contact, Designation, T-shirt Size, and Dept/University.</li>
+          <li><strong>Manual Entry:</strong> Add organizers manually using the "Add Organizer" button.</li>
           <li><strong>Usage:</strong> Organizers added here can be selected as the target audience in the Email Campaigns engine to send out mass updates.</li>
         </ul>
       </InstructionBanner>
@@ -246,30 +246,7 @@ export const Volunteer = () => {
         )}
       </div>
 
-      {isAdmin && (
-        <Card>
-          <CardContent className="p-8">
-            <form
-              onDragEnter={handleDrag} onDragOver={handleDrag} onDragLeave={handleDrag} onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                dragActive ? "border-primary-800 bg-primary-50/20" : "border-slate-300 hover:border-slate-400"
-              }`}
-              onClick={() => document.getElementById("vol-file-input").click()}
-            >
-              <input id="vol-file-input" type="file" className="hidden" accept=".xlsx, .xls" onChange={handleFileChange} />
-              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4 shadow-inner">
-                <Upload className="h-5 w-5" />
-              </div>
-              <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200">
-                {importing ? "Importing Data..." : "Drag and Drop Excel File here"}
-              </h3>
-              <p className="text-xs text-slate-450 dark:text-slate-500 mt-1.5">
-                Supported columns: Full Name, Email, Contact, Designation, T-shirt Size, Dept, University
-              </p>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+
 
       <Card>
         <CardHeader>
@@ -334,7 +311,7 @@ export const Volunteer = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen} title="Organizer Details" size="3xl">
+      <Dialog isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} title="Organizer Details" size="xl">
         {selectedVol && (
           <div className="flex flex-col md:flex-row gap-8 p-6">
             <div className="flex-1 space-y-6">
@@ -376,7 +353,7 @@ export const Volunteer = () => {
         )}
       </Dialog>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen} title={formData.id ? "Edit Organizer" : "Add Organizer"} size="xl">
+      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={formData.id ? "Edit Organizer" : "Add Organizer"} size="xl">
         <form onSubmit={handleFormSubmit} className="p-6 flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -413,7 +390,7 @@ export const Volunteer = () => {
         </form>
       </Dialog>
 
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen} title="Delete Organizer" size="sm">
+      <Dialog isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Organizer" size="sm">
         <div className="p-6">
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Are you sure you want to delete <strong>{selectedVol?.fullName}</strong>? This action cannot be undone.
