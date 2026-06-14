@@ -348,11 +348,6 @@ export const DatabasePage = () => {
   // Resend Verification Email Trigger
   const triggerEmailResend = async (p) => {
     try {
-      // Queue participant email: update their status to trigger a send or make a call.
-      // For this system, we can update emailSent = false and set custom trigger, 
-      // or we can invoke the Cloud Function.
-      // Let's create an emailCampaign to resend.
-      // An easy, elegant way is to set `emailSent = false` to let them be selected in email engine list.
       await updateDoc(doc(db, "participants", p.id), {
         emailSent: false,
         updatedAt: serverTimestamp()
@@ -361,6 +356,47 @@ export const DatabasePage = () => {
     } catch (err) {
       console.error(err);
       showToast("Failed to trigger resend", "error");
+    }
+  };
+
+  // Auto-assign missing table numbers
+  const autoAssignTableNumbers = async () => {
+    if (!window.confirm("This will assign SL-XX table numbers to all participants who do not have one yet. Continue?")) return;
+    
+    let nextTableNum = 1;
+    participants.forEach(p => {
+      if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
+        const numPart = parseInt(String(p.tableNumber).substring(3), 10);
+        if (!isNaN(numPart) && numPart >= nextTableNum) {
+          nextTableNum = numPart + 1;
+        }
+      }
+    });
+
+    const unassigned = participants.filter(p => !p.tableNumber || p.tableNumber.trim() === "");
+    if (unassigned.length === 0) {
+      showToast("All participants already have table numbers!", "success");
+      return;
+    }
+
+    setLoading(true);
+    let count = 0;
+    try {
+      for (const p of unassigned) {
+        const tNum = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+        await updateDoc(doc(db, "participants", p.id), {
+          tableNumber: tNum,
+          updatedAt: serverTimestamp()
+        });
+        nextTableNum++;
+        count++;
+      }
+      showToast(`Assigned table numbers to ${count} existing teams!`, "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Error assigning table numbers", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -381,9 +417,14 @@ export const DatabasePage = () => {
           <p className="text-xs text-slate-500 mt-0.5">Manage all registered delegates and check-in logs</p>
         </div>
         {isAdmin && (
-          <Button onClick={() => openFormModal()} className="flex items-center gap-1.5 self-start sm:self-center">
-            <Plus className="h-4.5 w-4.5" /> Manual Registration
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={autoAssignTableNumbers} variant="outline" className="flex items-center gap-1.5 self-start sm:self-center border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+              Auto-Assign Missing Tables
+            </Button>
+            <Button onClick={() => openFormModal()} className="flex items-center gap-1.5 self-start sm:self-center">
+              <Plus className="h-4.5 w-4.5" /> Manual Registration
+            </Button>
+          </div>
         )}
       </div>
 
