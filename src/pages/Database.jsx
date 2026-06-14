@@ -170,6 +170,17 @@ export const DatabasePage = () => {
         timestamp: part.timestamp || ""
       });
     } else {
+      let nextTableNum = 1;
+      participants.forEach(p => {
+        if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
+          const numPart = parseInt(String(p.tableNumber).substring(3), 10);
+          if (!isNaN(numPart) && numPart >= nextTableNum) {
+            nextTableNum = numPart + 1;
+          }
+        }
+      });
+      const autoTableNumber = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+
       setFormData({
         id: "",
         fullName: "",
@@ -183,7 +194,7 @@ export const DatabasePage = () => {
         paymentStatus: "Pending",
         teamName: "",
         teamMembers: "",
-        tableNumber: "",
+        tableNumber: autoTableNumber,
         ieeeMembershipLink: "",
         bkashNumber: "",
         transactionId: "",
