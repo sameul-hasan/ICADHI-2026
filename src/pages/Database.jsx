@@ -77,6 +77,7 @@ export const DatabasePage = () => {
     paymentStatus: "Pending",
     teamName: "",
     teamMembers: "",
+    tableNumber: "",
     tShirtSize: "",
     ieeeMembershipLink: "",
     bkashNumber: "",
@@ -158,6 +159,7 @@ export const DatabasePage = () => {
         paymentStatus: part.paymentStatus || "Pending",
         teamName: part.teamName || "",
         teamMembers: part.teamMembers || "",
+        tableNumber: part.tableNumber || "",
         tShirtSize: part.tShirtSize || "",
         ieeeMembershipLink: part.ieeeMembershipLink || "",
         bkashNumber: part.bkashNumber || "",
@@ -181,6 +183,7 @@ export const DatabasePage = () => {
         paymentStatus: "Pending",
         teamName: "",
         teamMembers: "",
+        tableNumber: "",
         ieeeMembershipLink: "",
         bkashNumber: "",
         transactionId: "",
@@ -217,6 +220,7 @@ export const DatabasePage = () => {
           paymentStatus: formData.paymentStatus,
           teamName: formData.teamName,
           teamMembers: formData.teamMembers,
+          tableNumber: formData.tableNumber,
           tShirtSize: formData.tShirtSize,
           ieeeMembershipLink: formData.ieeeMembershipLink,
           bkashNumber: formData.bkashNumber,
@@ -258,6 +262,7 @@ export const DatabasePage = () => {
           paymentStatus: formData.paymentStatus,
           teamName: formData.teamName,
           teamMembers: formData.teamMembers,
+          tableNumber: formData.tableNumber,
           tShirtSize: formData.tShirtSize,
           ieeeMembershipLink: formData.ieeeMembershipLink,
           bkashNumber: formData.bkashNumber,
@@ -657,6 +662,12 @@ export const DatabasePage = () => {
                   </div>
                 )}
               </div>
+              {selectedPart.tableNumber && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider block mb-1">Assigned Table</span>
+                  <p className="text-lg font-black text-amber-800 dark:text-amber-400 leading-none">Table {selectedPart.tableNumber}</p>
+                </div>
+              )}
               {selectedPart.teamMembers && (
                 <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Team Members</span>
@@ -875,12 +886,20 @@ export const DatabasePage = () => {
                 onChange={(e) => setFormData(prev => ({ ...prev, ambassadorId: e.target.value }))}
               />
             </div>
-            <Input 
-              label="Other Team Members" 
-              placeholder="E.g., John Doe, Jane Smith"
-              value={formData.teamMembers}
-              onChange={(e) => setFormData(prev => ({ ...prev, teamMembers: e.target.value }))}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input 
+                label="Other Team Members" 
+                placeholder="E.g., John Doe, Jane Smith"
+                value={formData.teamMembers}
+                onChange={(e) => setFormData(prev => ({ ...prev, teamMembers: e.target.value }))}
+              />
+              <Input 
+                label="Table Number" 
+                placeholder="E.g., 12"
+                value={formData.tableNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, tableNumber: e.target.value }))}
+              />
+            </div>
             <Input 
               label="T-Shirt Sizes" 
               placeholder="E.g., L (Leader), M (Member 2)"

@@ -580,10 +580,15 @@ export const Scanner = () => {
                             Ambassador: {scannedParticipant.ambassadorId}
                           </p>
                         )}
-                        <div className="mt-2">
+                        <div className="mt-2 flex gap-2 flex-wrap items-center">
                            <Badge variant={scannedParticipant.activeCollection === "participants" ? "primary" : scannedParticipant.activeCollection === "volunteers" ? "purple" : "pink"} className="uppercase tracking-wider">
                              {scannedParticipant.activeCollection === "participants" ? "Participant" : scannedParticipant.activeCollection === "volunteers" ? "Organizer" : "Ambassador"}
                            </Badge>
+                           {scannedParticipant.tableNumber && (
+                             <Badge variant="warning" className="uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-300 dark:border-amber-700">
+                               Table {scannedParticipant.tableNumber}
+                             </Badge>
+                           )}
                         </div>
                       </div>
                     </div>
