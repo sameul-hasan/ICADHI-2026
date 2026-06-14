@@ -585,9 +585,9 @@ export const Scanner = () => {
                              {scannedParticipant.activeCollection === "participants" ? "Participant" : scannedParticipant.activeCollection === "volunteers" ? "Organizer" : "Ambassador"}
                            </Badge>
                            {scannedParticipant.tableNumber && (
-                             <Badge variant="warning" className="uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-300 dark:border-amber-700">
+                             <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-blue-700">
                                Table {scannedParticipant.tableNumber}
-                             </Badge>
+                             </div>
                            )}
                         </div>
                       </div>

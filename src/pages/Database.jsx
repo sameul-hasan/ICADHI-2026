@@ -715,9 +715,9 @@ export const DatabasePage = () => {
                 )}
               </div>
               {selectedPart.tableNumber && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
-                  <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider block mb-1">Assigned Table</span>
-                  <p className="text-lg font-black text-amber-800 dark:text-amber-400 leading-none">Table {selectedPart.tableNumber}</p>
+                <div className="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 rounded-xl border border-blue-700 shadow-md">
+                  <span className="text-xs font-bold text-blue-200 uppercase tracking-wider block mb-1">Assigned Table</span>
+                  <p className="text-xl font-black text-white leading-none">Table {selectedPart.tableNumber}</p>
                 </div>
               )}
               {selectedPart.teamMembers && (
