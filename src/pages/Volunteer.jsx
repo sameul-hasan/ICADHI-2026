@@ -28,7 +28,7 @@ export const Volunteer = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   
   const [formData, setFormData] = useState({
-    id: "", fullName: "", email: "", phone: "", designation: "", tShirtSize: "", deptUniversity: ""
+    id: "", fullName: "", email: "", phone: "", designation: "", tShirtSize: "", deptUniversity: "", tableNumber: ""
   });
 
   useEffect(() => {
@@ -50,10 +50,27 @@ export const Volunteer = () => {
         phone: vol.phone || "",
         designation: vol.designation || "",
         tShirtSize: vol.tShirtSize || "",
-        deptUniversity: vol.deptUniversity || ""
+        deptUniversity: vol.deptUniversity || "",
+        tableNumber: vol.tableNumber || ""
       });
     } else {
-      setFormData({ id: "", fullName: "", email: "", phone: "", designation: "", tShirtSize: "", deptUniversity: "" });
+      let nextTableNum = 1;
+      volunteers.forEach(p => {
+        if (p.tableNumber) {
+          const numStr = String(p.tableNumber).replace(/\D/g, '');
+          if (numStr) {
+            const numPart = parseInt(numStr, 10);
+            if (!isNaN(numPart) && numPart >= nextTableNum) {
+              nextTableNum = numPart + 1;
+            }
+          }
+        }
+      });
+      const autoTableNumber = nextTableNum.toString();
+
+      setFormData({ 
+        id: "", fullName: "", email: "", phone: "", designation: "", tShirtSize: "", deptUniversity: "", tableNumber: autoTableNumber 
+      });
     }
     setIsFormOpen(true);
   };
@@ -73,7 +90,8 @@ export const Volunteer = () => {
           phone: formData.phone,
           designation: formData.designation,
           tShirtSize: formData.tShirtSize,
-          deptUniversity: formData.deptUniversity
+          deptUniversity: formData.deptUniversity,
+          tableNumber: formData.tableNumber
         });
         showToast("Organizer updated", "success");
       } else {
@@ -86,6 +104,7 @@ export const Volunteer = () => {
           designation: formData.designation,
           tShirtSize: formData.tShirtSize,
           deptUniversity: formData.deptUniversity,
+          tableNumber: formData.tableNumber,
           createdAt: serverTimestamp()
         });
         showToast("Organizer created", "success");
@@ -109,6 +128,48 @@ export const Volunteer = () => {
     } catch (err) {
       console.error(err);
       showToast("Failed to delete", "error");
+    }
+  };
+
+  const autoAssignTableNumbers = async () => {
+    if (!window.confirm("This will assign table numbers to all organizers who do not have one yet. Continue?")) return;
+    
+    let nextTableNum = 1;
+    volunteers.forEach(p => {
+      if (p.tableNumber) {
+        const numStr = String(p.tableNumber).replace(/\D/g, '');
+        if (numStr) {
+          const numPart = parseInt(numStr, 10);
+          if (!isNaN(numPart) && numPart >= nextTableNum) {
+            nextTableNum = numPart + 1;
+          }
+        }
+      }
+    });
+
+    const unassigned = volunteers.filter(p => !p.tableNumber || p.tableNumber.trim() === "");
+    if (unassigned.length === 0) {
+      showToast("All organizers already have table numbers!", "success");
+      return;
+    }
+
+    setLoading(true);
+    let count = 0;
+    try {
+      for (const p of unassigned) {
+        const tNum = nextTableNum.toString();
+        await updateDoc(doc(db, "volunteers", p.id), {
+          tableNumber: tNum,
+        });
+        nextTableNum++;
+        count++;
+      }
+      showToast(`Assigned table numbers to ${count} organizers!`, "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Error assigning table numbers", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -162,12 +223,27 @@ export const Volunteer = () => {
 
     setImporting(true);
     try {
+      let nextTableNum = 1;
+      volunteers.forEach(p => {
+        if (p.tableNumber) {
+          const numStr = String(p.tableNumber).replace(/\D/g, '');
+          if (numStr) {
+            const numPart = parseInt(numStr, 10);
+            if (!isNaN(numPart) && numPart >= nextTableNum) {
+              nextTableNum = numPart + 1;
+            }
+          }
+        }
+      });
+
       const batchSize = 450;
       let committed = 0;
       for (let i = 0; i < validRows.length; i += batchSize) {
         const chunk = validRows.slice(i, i + batchSize);
         const batch = writeBatch(db);
         chunk.forEach(row => {
+          const autoTableNumber = nextTableNum.toString();
+          nextTableNum++;
           const vId = `VOL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
           const ref = doc(db, "volunteers", vId);
           batch.set(ref, {
@@ -178,6 +254,7 @@ export const Volunteer = () => {
             designation: row.designation,
             tShirtSize: row.tShirtSize,
             deptUniversity: row.deptUniversity,
+            tableNumber: autoTableNumber,
             createdAt: serverTimestamp()
           });
         });
@@ -240,9 +317,14 @@ export const Volunteer = () => {
           <p className="text-xs text-slate-500 mt-0.5">Manage and import organizer data</p>
         </div>
         {isAdmin && (
-          <Button variant="primary" onClick={() => openFormModal()} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add Organizer
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={autoAssignTableNumbers} variant="outline" className="flex items-center gap-1.5 self-start sm:self-center border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+              Auto-Assign Missing Tables
+            </Button>
+            <Button variant="primary" onClick={() => openFormModal()} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Add Organizer
+            </Button>
+          </div>
         )}
       </div>
 
@@ -256,6 +338,7 @@ export const Volunteer = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Table</TableHead>
                 <TableHead>Organizer ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
@@ -270,6 +353,7 @@ export const Volunteer = () => {
             <TableBody>
               {volunteers.map(v => (
                 <TableRow key={v.id}>
+                  <TableCell className="text-xs font-medium text-slate-500">{v.tableNumber || "N/A"}</TableCell>
                   <TableCell className="font-mono text-xs font-bold text-slate-500">{v.volunteerId}</TableCell>
                   <TableCell className="font-bold">{v.fullName}</TableCell>
                   <TableCell>{v.email}</TableCell>
@@ -303,7 +387,7 @@ export const Volunteer = () => {
               ))}
               {volunteers.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">No organizers found</TableCell>
+                  <TableCell colSpan={10} className="text-center py-8 text-slate-500">No organizers found</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -326,6 +410,12 @@ export const Volunteer = () => {
                 <div><span className="text-xs text-slate-500 font-bold block mb-1">Dept/Univ</span><span className="text-sm font-medium">{selectedVol.deptUniversity || "N/A"}</span></div>
                 <div><span className="text-xs text-slate-500 font-bold block mb-1">T-Shirt Size</span><span className="text-sm font-medium">{selectedVol.tShirtSize || "N/A"}</span></div>
               </div>
+              {selectedVol.tableNumber && (
+                <div className="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 rounded-xl border border-blue-700 shadow-md">
+                  <span className="text-xs font-bold text-blue-200 uppercase tracking-wider block mb-1">Assigned Table</span>
+                  <p className="text-xl font-black text-white leading-none">Table {selectedVol.tableNumber}</p>
+                </div>
+              )}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                 <Badge variant={selectedVol.registrationScanned ? "success" : "neutral"}>
                   Reg: {selectedVol.registrationScanned ? "Scanned" : "Pending"}
@@ -379,6 +469,10 @@ export const Volunteer = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500">T-Shirt Size</label>
               <Input value={formData.tShirtSize} onChange={e => setFormData({ ...formData, tShirtSize: e.target.value })} placeholder="L" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Table Number</label>
+              <Input value={formData.tableNumber} onChange={e => setFormData({ ...formData, tableNumber: e.target.value })} placeholder="1" />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">

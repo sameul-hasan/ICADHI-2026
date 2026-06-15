@@ -55,14 +55,17 @@ export const Ambassador = () => {
     } else {
       let nextTableNum = 1;
       ambassadors.forEach(p => {
-        if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
-          const numPart = parseInt(String(p.tableNumber).substring(3), 10);
-          if (!isNaN(numPart) && numPart >= nextTableNum) {
-            nextTableNum = numPart + 1;
+        if (p.tableNumber) {
+          const numStr = String(p.tableNumber).replace(/\D/g, '');
+          if (numStr) {
+            const numPart = parseInt(numStr, 10);
+            if (!isNaN(numPart) && numPart >= nextTableNum) {
+              nextTableNum = numPart + 1;
+            }
           }
         }
       });
-      const autoTableNumber = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+      const autoTableNumber = nextTableNum.toString();
 
       setFormData({ 
         id: "", 
@@ -140,10 +143,13 @@ export const Ambassador = () => {
     
     let nextTableNum = 1;
     ambassadors.forEach(p => {
-      if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
-        const numPart = parseInt(String(p.tableNumber).substring(3), 10);
-        if (!isNaN(numPart) && numPart >= nextTableNum) {
-          nextTableNum = numPart + 1;
+      if (p.tableNumber) {
+        const numStr = String(p.tableNumber).replace(/\D/g, '');
+        if (numStr) {
+          const numPart = parseInt(numStr, 10);
+          if (!isNaN(numPart) && numPart >= nextTableNum) {
+            nextTableNum = numPart + 1;
+          }
         }
       }
     });
@@ -158,7 +164,7 @@ export const Ambassador = () => {
     let count = 0;
     try {
       for (const p of unassigned) {
-        const tNum = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+        const tNum = nextTableNum.toString();
         await updateDoc(doc(db, "ambassadors", p.id), {
           tableNumber: tNum,
         });
@@ -238,7 +244,7 @@ export const Ambassador = () => {
         const chunk = validRows.slice(i, i + batchSize);
         const batch = writeBatch(db);
         chunk.forEach(row => {
-          const autoTableNumber = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+          const autoTableNumber = nextTableNum.toString();
           nextTableNum++;
           const aId = `AMB-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
           const ref = doc(db, "ambassadors", aId);
@@ -335,7 +341,7 @@ export const Ambassador = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>SL</TableHead>
+                <TableHead>Table</TableHead>
                 <TableHead>Ambassador ID</TableHead>
                 <TableHead>Full Name</TableHead>
                 <TableHead>University Name</TableHead>
@@ -462,7 +468,7 @@ export const Ambassador = () => {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500">Table Number</label>
-              <Input value={formData.tableNumber} onChange={e => setFormData({ ...formData, tableNumber: e.target.value })} placeholder="SL-01" />
+              <Input value={formData.tableNumber} onChange={e => setFormData({ ...formData, tableNumber: e.target.value })} placeholder="1" />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
