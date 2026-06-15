@@ -28,7 +28,7 @@ export const Ambassador = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   
   const [formData, setFormData] = useState({
-    id: "", fullName: "", universityName: "", universityEmail: "", personalEmail: "", mobileNumber: ""
+    id: "", fullName: "", universityName: "", universityEmail: "", personalEmail: "", mobileNumber: "", tableNumber: ""
   });
 
   useEffect(() => {
@@ -50,9 +50,29 @@ export const Ambassador = () => {
         universityEmail: amb.universityEmail || "",
         personalEmail: amb.personalEmail || "",
         mobileNumber: amb.mobileNumber || "",
+        tableNumber: amb.tableNumber || "",
       });
     } else {
-      setFormData({ id: "", fullName: "", universityName: "", universityEmail: "", personalEmail: "", mobileNumber: "" });
+      let nextTableNum = 1;
+      ambassadors.forEach(p => {
+        if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
+          const numPart = parseInt(String(p.tableNumber).substring(3), 10);
+          if (!isNaN(numPart) && numPart >= nextTableNum) {
+            nextTableNum = numPart + 1;
+          }
+        }
+      });
+      const autoTableNumber = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+
+      setFormData({ 
+        id: "", 
+        fullName: "", 
+        universityName: "", 
+        universityEmail: "", 
+        personalEmail: "", 
+        mobileNumber: "",
+        tableNumber: autoTableNumber 
+      });
     }
     setIsFormOpen(true);
   };
@@ -74,6 +94,7 @@ export const Ambassador = () => {
           email: formData.personalEmail.toLowerCase() || formData.universityEmail.toLowerCase(),
           phone: formData.mobileNumber,
           mobileNumber: formData.mobileNumber,
+          tableNumber: formData.tableNumber,
         });
         showToast("Ambassador updated", "success");
       } else {
@@ -87,6 +108,7 @@ export const Ambassador = () => {
           email: formData.personalEmail.toLowerCase() || formData.universityEmail.toLowerCase(),
           phone: formData.mobileNumber,
           mobileNumber: formData.mobileNumber,
+          tableNumber: formData.tableNumber,
           createdAt: serverTimestamp()
         });
         showToast("Ambassador created", "success");
@@ -110,6 +132,45 @@ export const Ambassador = () => {
     } catch (err) {
       console.error(err);
       showToast("Failed to delete", "error");
+    }
+  };
+
+  const autoAssignTableNumbers = async () => {
+    if (!window.confirm("This will assign SL-XX table numbers to all ambassadors who do not have one yet. Continue?")) return;
+    
+    let nextTableNum = 1;
+    ambassadors.forEach(p => {
+      if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
+        const numPart = parseInt(String(p.tableNumber).substring(3), 10);
+        if (!isNaN(numPart) && numPart >= nextTableNum) {
+          nextTableNum = numPart + 1;
+        }
+      }
+    });
+
+    const unassigned = ambassadors.filter(p => !p.tableNumber || p.tableNumber.trim() === "");
+    if (unassigned.length === 0) {
+      showToast("All ambassadors already have table numbers!", "success");
+      return;
+    }
+
+    setLoading(true);
+    let count = 0;
+    try {
+      for (const p of unassigned) {
+        const tNum = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+        await updateDoc(doc(db, "ambassadors", p.id), {
+          tableNumber: tNum,
+        });
+        nextTableNum++;
+        count++;
+      }
+      showToast(`Assigned table numbers to ${count} ambassadors!`, "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Error assigning table numbers", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,12 +222,24 @@ export const Ambassador = () => {
 
     setImporting(true);
     try {
+      let nextTableNum = 1;
+      ambassadors.forEach(p => {
+        if (p.tableNumber && String(p.tableNumber).toUpperCase().startsWith("SL-")) {
+          const numPart = parseInt(String(p.tableNumber).substring(3), 10);
+          if (!isNaN(numPart) && numPart >= nextTableNum) {
+            nextTableNum = numPart + 1;
+          }
+        }
+      });
+
       const batchSize = 450;
       let committed = 0;
       for (let i = 0; i < validRows.length; i += batchSize) {
         const chunk = validRows.slice(i, i + batchSize);
         const batch = writeBatch(db);
         chunk.forEach(row => {
+          const autoTableNumber = `SL-${nextTableNum.toString().padStart(2, '0')}`;
+          nextTableNum++;
           const aId = `AMB-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
           const ref = doc(db, "ambassadors", aId);
           batch.set(ref, {
@@ -178,6 +251,7 @@ export const Ambassador = () => {
             email: row.personalEmail || row.universityEmail,
             phone: row.mobileNumber,
             mobileNumber: row.mobileNumber,
+            tableNumber: autoTableNumber,
             createdAt: serverTimestamp()
           });
         });
@@ -240,9 +314,14 @@ export const Ambassador = () => {
           <p className="text-xs text-slate-500 mt-0.5">Manage and import ambassador data</p>
         </div>
         {isAdmin && (
-          <Button variant="primary" onClick={() => openFormModal()} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add Ambassador
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={autoAssignTableNumbers} variant="outline" className="flex items-center gap-1.5 self-start sm:self-center border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+              Auto-Assign Missing Tables
+            </Button>
+            <Button variant="primary" onClick={() => openFormModal()} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Add Ambassador
+            </Button>
+          </div>
         )}
       </div>
 
@@ -256,6 +335,7 @@ export const Ambassador = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>SL</TableHead>
                 <TableHead>Ambassador ID</TableHead>
                 <TableHead>Full Name</TableHead>
                 <TableHead>University Name</TableHead>
@@ -267,8 +347,9 @@ export const Ambassador = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ambassadors.map(a => (
+              {ambassadors.map((a, index) => (
                 <TableRow key={a.id}>
+                  <TableCell className="text-xs font-medium text-slate-500">{a.tableNumber || "N/A"}</TableCell>
                   <TableCell className="font-mono text-xs font-bold text-slate-500">{a.ambassadorId}</TableCell>
                   <TableCell className="font-bold">{a.fullName}</TableCell>
                   <TableCell>{a.universityName || "N/A"}</TableCell>
@@ -301,7 +382,7 @@ export const Ambassador = () => {
               ))}
               {ambassadors.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">No ambassadors found</TableCell>
+                  <TableCell colSpan={9} className="text-center py-8 text-slate-500">No ambassadors found</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -323,6 +404,12 @@ export const Ambassador = () => {
                 <div><span className="text-xs text-slate-500 font-bold block mb-1">University Email</span><span className="text-sm font-medium break-all">{selectedAmb.universityEmail || "N/A"}</span></div>
                 <div><span className="text-xs text-slate-500 font-bold block mb-1">Personal Email</span><span className="text-sm font-medium break-all">{selectedAmb.personalEmail || "N/A"}</span></div>
               </div>
+              {selectedAmb.tableNumber && (
+                <div className="bg-gradient-to-r from-blue-900 to-indigo-900 p-4 rounded-xl border border-blue-700 shadow-md">
+                  <span className="text-xs font-bold text-blue-200 uppercase tracking-wider block mb-1">Assigned Table</span>
+                  <p className="text-xl font-black text-white leading-none">Table {selectedAmb.tableNumber}</p>
+                </div>
+              )}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                 <Badge variant={selectedAmb.registrationScanned ? "success" : "neutral"}>
                   Reg: {selectedAmb.registrationScanned ? "Scanned" : "Pending"}
@@ -372,6 +459,10 @@ export const Ambassador = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-500">Mobile Number</label>
               <Input value={formData.mobileNumber} onChange={e => setFormData({ ...formData, mobileNumber: e.target.value })} placeholder="+880..." />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500">Table Number</label>
+              <Input value={formData.tableNumber} onChange={e => setFormData({ ...formData, tableNumber: e.target.value })} placeholder="SL-01" />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
