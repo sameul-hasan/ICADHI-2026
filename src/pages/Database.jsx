@@ -797,43 +797,45 @@ export const DatabasePage = () => {
             </div>
 
             {/* QR Display */}
-            <div className="flex flex-col items-center justify-center border-l border-slate-100 dark:border-slate-800 pl-6 space-y-4">
-              <span className="text-xs font-bold text-slate-500 uppercase">Participant QR Code</span>
-              {(() => {
-                const qrUrl = selectedPart.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedPart.participantId, secureToken: selectedPart.uniqueToken || `ICADHI-2026-${selectedPart.participantId}` }))}`;
-                return (
-                  <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center">
-                    <img
-                      src={qrUrl}
-                      alt="Registration QR Code"
-                      className="h-44 w-44 object-contain"
-                    />
-                    <a
-                      href={qrUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 flex items-center gap-1.5 text-xs font-bold text-primary-850 hover:underline cursor-pointer"
-                    >
-                      <Download className="h-4 w-4" /> Open Full Image
-                    </a>
-                  </div>
-                );
-              })()}
+            {(isAdmin || isSuperAdmin) && (
+              <div className="flex flex-col items-center justify-center border-l border-slate-100 dark:border-slate-800 pl-6 space-y-4">
+                <span className="text-xs font-bold text-slate-500 uppercase">Participant QR Code</span>
+                {(() => {
+                  const qrUrl = selectedPart.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedPart.participantId, secureToken: selectedPart.uniqueToken || `ICADHI-2026-${selectedPart.participantId}` }))}`;
+                  return (
+                    <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center">
+                      <img
+                        src={qrUrl}
+                        alt="Registration QR Code"
+                        className="h-44 w-44 object-contain"
+                      />
+                      <a
+                        href={qrUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 flex items-center gap-1.5 text-xs font-bold text-primary-850 hover:underline cursor-pointer"
+                      >
+                        <Download className="h-4 w-4" /> Open Full Image
+                      </a>
+                    </div>
+                  );
+                })()}
 
-              <div className="text-center text-xs mt-2">
-                <span className="font-semibold text-slate-400 block">Email Delivery Status</span>
-                {selectedPart.emailSent ? (
-                  <Badge variant="success" className="mt-1">QR Email Delivered</Badge>
-                ) : (
-                  <Badge variant="warning" className="mt-1">Pending Delivery</Badge>
-                )}
-                {selectedPart.emailSentAt && (
-                  <span className="block text-[10px] text-slate-400 mt-1">
-                    {selectedPart.emailSentAt.toDate ? selectedPart.emailSentAt.toDate().toLocaleString() : new Date(selectedPart.emailSentAt).toLocaleString()}
-                  </span>
-                )}
+                <div className="text-center text-xs mt-2">
+                  <span className="font-semibold text-slate-400 block">Email Delivery Status</span>
+                  {selectedPart.emailSent ? (
+                    <Badge variant="success" className="mt-1">QR Email Delivered</Badge>
+                  ) : (
+                    <Badge variant="warning" className="mt-1">Pending Delivery</Badge>
+                  )}
+                  {selectedPart.emailSentAt && (
+                    <span className="block text-[10px] text-slate-400 mt-1">
+                      {selectedPart.emailSentAt.toDate ? selectedPart.emailSentAt.toDate().toLocaleString() : new Date(selectedPart.emailSentAt).toLocaleString()}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </Dialog>

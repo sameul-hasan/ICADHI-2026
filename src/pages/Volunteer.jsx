@@ -14,7 +14,7 @@ import { Upload, FileSpreadsheet, Info, Plus, Eye, Edit, Trash2, UserCheck } fro
 import * as XLSX from "xlsx";
 
 export const Volunteer = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isSuperAdmin } = useAuth();
   const { showToast } = useToast();
   
   const [volunteers, setVolunteers] = useState([]);
@@ -416,29 +416,37 @@ export const Volunteer = () => {
                   <p className="text-xl font-black text-white leading-none">Table {selectedVol.tableNumber}</p>
                 </div>
               )}
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex gap-2">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-2">
                 <Badge variant={selectedVol.registrationScanned ? "success" : "neutral"}>
                   Reg: {selectedVol.registrationScanned ? "Scanned" : "Pending"}
                 </Badge>
                 <Badge variant={selectedVol.kitCollected ? "success" : "neutral"}>
                   Kit: {selectedVol.kitCollected ? "Collected" : "Pending"}
                 </Badge>
+                <Badge variant={selectedVol.breakfastCollected ? "success" : "neutral"}>
+                  Breakfast: {selectedVol.breakfastCollected ? "Collected" : "Pending"}
+                </Badge>
+                <Badge variant={selectedVol.lunchCollected ? "success" : "neutral"}>
+                  Lunch: {selectedVol.lunchCollected ? "Collected" : "Pending"}
+                </Badge>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center border-l border-slate-100 dark:border-slate-800 pl-6">
-              <span className="text-xs font-bold text-slate-500 uppercase mb-4">Organizer QR Code</span>
-              {(() => {
-                const qrUrl = selectedVol.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedVol.id, secureToken: selectedVol.volunteerId }))}`;
-                return (
-                  <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center">
-                    <img src={qrUrl} alt="QR Code" className="h-44 w-44 object-contain" />
-                    <a href={qrUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-600 font-bold mt-3 underline">
-                      Download Full Size
-                    </a>
-                  </div>
-                );
-              })()}
-            </div>
+            {(isAdmin || isSuperAdmin) && (
+              <div className="flex flex-col items-center justify-center border-l border-slate-100 dark:border-slate-800 pl-6">
+                <span className="text-xs font-bold text-slate-500 uppercase mb-4">Organizer QR Code</span>
+                {(() => {
+                  const qrUrl = selectedVol.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(JSON.stringify({ participantId: selectedVol.id, secureToken: selectedVol.volunteerId }))}`;
+                  return (
+                    <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-inner flex flex-col items-center">
+                      <img src={qrUrl} alt="QR Code" className="h-44 w-44 object-contain" />
+                      <a href={qrUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-600 font-bold mt-3 underline">
+                        Download Full Size
+                      </a>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         )}
       </Dialog>
