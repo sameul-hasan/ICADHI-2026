@@ -584,12 +584,12 @@ export const Scanner = () => {
                            <Badge variant={scannedParticipant.activeCollection === "participants" ? "primary" : scannedParticipant.activeCollection === "volunteers" ? "purple" : "pink"} className="uppercase tracking-wider">
                              {scannedParticipant.activeCollection === "participants" ? "Participant" : scannedParticipant.activeCollection === "volunteers" ? "Organizer" : "Ambassador"}
                            </Badge>
-                           {scannedParticipant.tableNumber && (
-                             <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-blue-700">
-                               Table {scannedParticipant.tableNumber}
-                             </div>
-                           )}
                         </div>
+                        {scannedParticipant.tableNumber && (
+                          <div className="mt-4 bg-gradient-to-r from-blue-900 to-indigo-900 text-white px-6 py-3 rounded-xl text-2xl font-black uppercase tracking-widest shadow-lg border border-blue-500 inline-block">
+                            Table {scannedParticipant.tableNumber}
+                          </div>
+                        )}
                       </div>
                     </div>
  
