@@ -99,15 +99,29 @@ service cloud.firestore {
     // Volunteers collection rules
     match /volunteers/{volunteerId} {
       allow read: if isVolunteer();
-      allow create, update: if isAdmin();
+      allow create: if isAdmin();
       allow delete: if isSuperAdmin();
+      allow update: if isAdmin() || (
+        isAuthenticated() && (
+          (isRegDesk() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['registrationScanned', 'registrationScannedAt', 'kitCollected', 'kitCollectedAt', 'updatedAt'])) ||
+          (isBreakfastDesk() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['breakfastCollected', 'breakfastCollectedAt', 'updatedAt'])) ||
+          (isLunchDesk() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lunchCollected', 'lunchCollectedAt', 'updatedAt']))
+        )
+      );
     }
 
     // Ambassadors collection rules
     match /ambassadors/{ambassadorId} {
       allow read: if isVolunteer();
-      allow create, update: if isAdmin();
+      allow create: if isAdmin();
       allow delete: if isSuperAdmin();
+      allow update: if isAdmin() || (
+        isAuthenticated() && (
+          (isRegDesk() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['registrationScanned', 'registrationScannedAt', 'kitCollected', 'kitCollectedAt', 'updatedAt'])) ||
+          (isBreakfastDesk() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['breakfastCollected', 'breakfastCollectedAt', 'updatedAt'])) ||
+          (isLunchDesk() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lunchCollected', 'lunchCollectedAt', 'updatedAt']))
+        )
+      );
     }
 
     // 3. SMTP settings rules: Only accessible by Admin

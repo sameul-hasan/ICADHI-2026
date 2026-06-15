@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { 
-  LayoutDashboard, 
-  ScanLine, 
-  Database, 
-  UploadCloud, 
-  Mail, 
-  FileCode, 
-  Settings2, 
-  Users, 
-  History, 
-  BarChart3, 
-  LogOut, 
-  Menu, 
-  X, 
-  Sun, 
+import {
+  LayoutDashboard,
+  ScanLine,
+  Database,
+  UploadCloud,
+  Mail,
+  FileCode,
+  Settings2,
+  Users,
+  History,
+  BarChart3,
+  LogOut,
+  Menu,
+  X,
+  Sun,
   Moon,
   HeartHandshake,
   Award
@@ -46,77 +46,77 @@ export const DashboardLayout = ({ children }) => {
 
   // Define sidebar navigation items based on roles
   const menuItems = [
-    { 
-      name: "Dashboard", 
-      path: "/", 
-      icon: <LayoutDashboard className="h-5 w-5" />, 
-      show: true 
+    {
+      name: "Dashboard",
+      path: "/",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      show: true
     },
-    { 
-      name: "QR Scanner", 
-      path: "/scanner", 
-      icon: <ScanLine className="h-5 w-5" />, 
-      show: isRegDesk || isBreakfastDesk || isLunchDesk 
+    {
+      name: "QR Scanner",
+      path: "/scanner",
+      icon: <ScanLine className="h-5 w-5" />,
+      show: isRegDesk || isBreakfastDesk || isLunchDesk
     },
-    { 
-      name: "Participants", 
-      path: "/database", 
-      icon: <Database className="h-5 w-5" />, 
-      show: true 
+    {
+      name: "Participants",
+      path: "/database",
+      icon: <Database className="h-5 w-5" />,
+      show: true
     },
-    { 
-      name: "Organizers", 
-      path: "/volunteers", 
-      icon: <HeartHandshake className="h-5 w-5" />, 
-      show: true 
+    {
+      name: "Organizers",
+      path: "/volunteers",
+      icon: <HeartHandshake className="h-5 w-5" />,
+      show: isAdmin || isRegDesk
     },
-    { 
-      name: "Ambassadors", 
-      path: "/ambassadors", 
-      icon: <Award className="h-5 w-5" />, 
-      show: true 
+    {
+      name: "Ambassadors",
+      path: "/ambassadors",
+      icon: <Award className="h-5 w-5" />,
+      show: isAdmin || isRegDesk
     },
-    { 
-      name: "Excel Upload", 
-      path: "/upload", 
-      icon: <UploadCloud className="h-5 w-5" />, 
-      show: isAdmin 
+    {
+      name: "Excel Upload",
+      path: "/upload",
+      icon: <UploadCloud className="h-5 w-5" />,
+      show: isAdmin
     },
-    { 
-      name: "Email Campaigns", 
-      path: "/campaigns", 
-      icon: <Mail className="h-5 w-5" />, 
-      show: isAdmin 
+    {
+      name: "Email Campaigns",
+      path: "/campaigns",
+      icon: <Mail className="h-5 w-5" />,
+      show: isAdmin
     },
-    { 
-      name: "Templates Builder", 
-      path: "/templates", 
-      icon: <FileCode className="h-5 w-5" />, 
-      show: isAdmin 
+    {
+      name: "Templates Builder",
+      path: "/templates",
+      icon: <FileCode className="h-5 w-5" />,
+      show: isAdmin
     },
-    { 
-      name: "SMTP Config", 
-      path: "/smtp", 
-      icon: <Settings2 className="h-5 w-5" />, 
-      show: isAdmin 
+    {
+      name: "SMTP Config",
+      path: "/smtp",
+      icon: <Settings2 className="h-5 w-5" />,
+      show: isAdmin
     },
-    { 
-      name: "User Management", 
-      path: "/users", 
-      icon: <Users className="h-5 w-5" />, 
-      show: isSuperAdmin 
+    {
+      name: "User Management",
+      path: "/users",
+      icon: <Users className="h-5 w-5" />,
+      show: isSuperAdmin
     },
-    { 
-      name: "Audit Logs", 
-      path: "/logs", 
-      icon: <History className="h-5 w-5" />, 
-      show: isAdmin 
+    {
+      name: "Audit Logs",
+      path: "/logs",
+      icon: <History className="h-5 w-5" />,
+      show: isAdmin
     },
-    { 
-      name: "Reports & Analytics", 
-      path: "/reports", 
-      icon: <BarChart3 className="h-5 w-5" />, 
-      show: isAdmin 
+    {
+      name: "Reports & Analytics",
+      path: "/reports",
+      icon: <BarChart3 className="h-5 w-5" />,
+      show: isAdmin
     }
   ];
 
@@ -139,13 +139,13 @@ export const DashboardLayout = ({ children }) => {
                 to={item.path}
                 className={clsx(
                   "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all group",
-                  isActive 
-                    ? "bg-primary-50 dark:bg-primary-950/40 text-primary-800 dark:text-primary-300 border-l-4 border-primary-800" 
+                  isActive
+                    ? "bg-primary-50 dark:bg-primary-950/40 text-primary-800 dark:text-primary-300 border-l-4 border-primary-800"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100"
                 )}
               >
                 <span className={clsx(
-                  "transition-colors", 
+                  "transition-colors",
                   isActive ? "text-primary-800 dark:text-primary-300" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300"
                 )}>
                   {item.icon}
@@ -250,8 +250,8 @@ export const DashboardLayout = ({ children }) => {
                     to={item.path}
                     className={clsx(
                       "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all",
-                      isActive 
-                        ? "bg-primary-50 dark:bg-primary-950/40 text-primary-850 dark:text-primary-300 border-l-4 border-primary-850" 
+                      isActive
+                        ? "bg-primary-50 dark:bg-primary-950/40 text-primary-850 dark:text-primary-300 border-l-4 border-primary-850"
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850/50 hover:text-slate-900 dark:hover:text-slate-100"
                     )}
                   >
